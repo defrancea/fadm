@@ -18,6 +18,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -93,6 +94,7 @@ namespace Fadm.Core
 
             // Process the solution file in order to determine projects to process
             Regex solutionProjectRegex = new Regex(@"^Project\(""{(.+)}""\)\ *=\ *""(.+)""\ *,\ *""(.+)""\ *,\ *""{(.+)}""$");
+            List<ExecutionResult> projectProcessingExecutionResult = new List<ExecutionResult>();
             using (TextReader reader = new StreamReader(path))
             {
                 // Read the file line per line
@@ -110,7 +112,7 @@ namespace Fadm.Core
                         // There is no way to differencate both definitions so testing that the file exists is required.
                         if (File.Exists(filePath))
                         {
-                            this.ProcessProjectFile(filePath);
+                            projectProcessingExecutionResult.Add(this.ProcessProjectFile(filePath));
                         }
                     }
 
@@ -118,7 +120,7 @@ namespace Fadm.Core
             }
 
             // Return execution result.
-            return new ExecutionResult(ExecutionResultStatus.Success, string.Format("Solution '{0}' processed", path));
+            return new ExecutionResult(ExecutionResultStatus.Success, string.Format("Solution '{0}' processed", path), projectProcessingExecutionResult.ToArray());
         }
 
         /// <summary>
