@@ -45,11 +45,18 @@ namespace Fadm.CommandLine
         public FadmEngine FadmEngine { get; private set; }
 
         /// <summary>
+        /// The execution result formatter.
+        /// </summary>
+        /// <returns></returns>
+        public ExecutionResultFormatter Formatter { get; private set; }
+
+        /// <summary>
         /// Initializes a new instance of <see cref="FadmCommandLineProgram"/>.
         /// </summary>
         public FadmCommandLineProgram()
         {
             this.FadmEngine = new FadmEngine();
+            this.Formatter = new ExecutionResultFormatter();
         }
 
         /// <summary>
@@ -82,7 +89,7 @@ namespace Fadm.CommandLine
         public void Add(AddCommand add)
         {
             ExecutionResult result = this.FadmEngine.Add(add.FilePath);
-            Console.WriteLine(result.Message);
+            Console.WriteLine(Formatter.Format(result));
         }
 
         /// <summary>
@@ -92,7 +99,7 @@ namespace Fadm.CommandLine
         public void Install(InstallCommand install)
         {
             ExecutionResult result = this.FadmEngine.Install(install.FilePath);
-            Console.WriteLine(result.Message);
+            Console.WriteLine(Formatter.Format(result));
         }
     }
 }
