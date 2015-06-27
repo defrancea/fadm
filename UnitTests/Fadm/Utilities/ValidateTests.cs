@@ -18,42 +18,52 @@
  */
 
 using System;
+using NUnit.Framework;
 
 namespace Fadm.Utilities
 {
     /// <summary>
-    /// Groups validation utilities.
+    /// Tests ValidateTests.
     /// </summary>
-    public static class Validate
+    [TestFixture]
+    public class ValidateTests
     {
         /// <summary>
-        /// Validates that the received object is not null.
+        /// Tests IsNotNull(object, string) with null value.
         /// </summary>
-        /// <param name="obj">The object to check.</param>
-        /// <param name="message">The message to display if the error is thrown.</param>
-        public static void IsNotNull(object obj, string message)
+        [Test]
+        [ExpectedException(typeof(ArgumentException), ExpectedMessage = "Foo")]
+        public void IsNotNullNull()
         {
-            IsTrue(null != obj, message);
+            Validate.IsNotNull(null, "Foo");
         }
 
         /// <summary>
-        /// Validates that the check succedded.
+        /// Tests IsNotNull(object, string) with value.
         /// </summary>
-        /// <param name="check">The check.</param>
-        /// <param name="message">The message to display if the error is thrown.</param>
-        public static void IsTrue(bool check, string message)
+        [Test]
+        public void IsNotNullNotNull()
         {
-            // Make sure that the message is set
-            if (null == message)
-            {
-                message = string.Empty;
-            }
+            Validate.IsNotNull(new object(), "Foo");
+        }
 
-            // Raise an exception if the check didn't pass
-            if (!check)
-            {
-                throw new ArgumentException(message);
-            }
+        /// <summary>
+        /// Tests IsTrue(bool, string) with false value.
+        /// </summary>
+        [Test]
+        [ExpectedException(typeof(ArgumentException), ExpectedMessage = "Foo")]
+        public void IsTrueFalse()
+        {
+            Validate.IsTrue(false, "Foo");
+        }
+
+        /// <summary>
+        /// Tests IsTrue(bool, string) with false value.
+        /// </summary>
+        [Test]
+        public void IsTrueTrue()
+        {
+            Validate.IsTrue(true, "Foo");
         }
     }
 }

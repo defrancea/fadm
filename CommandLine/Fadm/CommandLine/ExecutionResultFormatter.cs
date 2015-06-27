@@ -47,7 +47,7 @@ namespace Fadm.CommandLine.Mapping
             // Data validation
             Validate.IsNotNull(stringBuilder, "stringBuilder must not be null.");
             Validate.IsNotNull(executionResult, "executionResult must not be null.");
-            Validate.IsTrue(0 > depth, "depth must not be positive.");
+            Validate.IsTrue(0 <= depth, "depth must be positive.");
 
             // Append current execution result to the builder
             stringBuilder.AppendLine(string.Format("{0}[{1}] {2}", new string('\t', depth), executionResult.Status, executionResult.Message));

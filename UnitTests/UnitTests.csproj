@@ -50,6 +50,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Fadm\CommandLine\ExecutionResultFormatterTests.cs" />
+    <Compile Include="Fadm\Utilities\ValidateTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -63,6 +64,10 @@
     <ProjectReference Include="..\Core\Core.csproj">
       <Project>{2a36ce60-9215-49c9-878e-f1cedd8d81cc}</Project>
       <Name>Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Utilities\Utilities.csproj">
+      <Project>{22afbcc8-ca90-46f2-b35a-424baccf4ab0}</Project>
+      <Name>Utilities</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>
