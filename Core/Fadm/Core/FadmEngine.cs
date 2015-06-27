@@ -16,10 +16,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA 02110-1301  USA
  */
- 
+
 using System;
 using System.IO;
 using System.Reflection;
+using System.Text.RegularExpressions;
+using System.Xml;
 
 namespace Fadm.Core
 {
@@ -28,6 +30,11 @@ namespace Fadm.Core
     /// </summary>
     public class FadmEngine
     {
+        /// <summary>
+        /// Installs a file to the local repository.
+        /// </summary>
+        /// <param name="path">The file path to install.</param>
+        /// <returns>The execution result.</returns>
         public ExecutionResult Install(string path)
         {
             // Validate file existence
@@ -62,6 +69,100 @@ namespace Fadm.Core
 
             // Return execution result
             return new ExecutionResult(string.Format("File installed to '{0}'", dllFileTarget));
+        }
+
+        /// <summary>
+        /// Adds Fadm installer to a solution or a project file.
+        /// </summary>
+        /// <param name="path">The file to add the installer to.</param>
+        /// <returns>The execution result.</returns>
+        public ExecutionResult Add(string path)
+        {
+            // Validate file existence
+            if (!File.Exists(path))
+            {
+                return new ExecutionResult(string.Format("The file '{0}' doesn't exist", path));
+            }
+
+            // If the file is not a solution file, directly process the file
+            string extension = Path.GetExtension(path);
+            if (".sln" != extension)
+            {
+                ProcessProjectFile(path);
+            }
+
+            // Process the solution file in order to determine projects to process
+            Regex solutionProjectRegex = new Regex(@"^Project\(""{(.+)}""\)\ *=\ *""(.+)""\ *,\ *""(.+)""\ *,\ *""{(.+)}""$");
+            using (TextReader reader = new StreamReader(path))
+            {
+                // Read the file line per line
+                string line;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    // In we find a math, extract the third group (project's file) and process it
+                    Match m = solutionProjectRegex.Match(line);
+                    if (m.Success)
+                    {
+                        string projectFile = m.Groups[3].Value;
+                        string filePath = Path.Combine(Path.GetDirectoryName(path), projectFile);
+
+                        // sln file Could reference directories as project to organize the solution.
+                        // There is no way to differencate both definitions so testing that the file exists is required.
+                        if (File.Exists(filePath))
+                        {
+                            this.ProcessProjectFile(filePath);
+                        }
+                    }
+
+                }
+            }
+
+            // Return execution result.
+            return new ExecutionResult(string.Format("Solution '{0}' processed", path));
+        }
+
+        /// <summary>
+        /// Processes project file injecting Famd install in the build process.
+        /// </summary>
+        /// <param name="path">The file to process.</param>
+        /// <returns></returns>
+        private ExecutionResult ProcessProjectFile(string path)
+        {
+            try
+            {
+                // Parse the project as a xml document
+                XmlDocument document = new XmlDocument();
+                document.Load(path);
+                XmlNamespaceManager namespaceManager = new XmlNamespaceManager(document.NameTable);
+                namespaceManager.AddNamespace("ns", @"http://schemas.microsoft.com/developer/msbuild/2003");
+
+                // Select "AfterBuild" definition
+                XmlNode postBuildEventNode = document.SelectSingleNode(@"//ns:Project/ns:Target[@Name='AfterBuild']", namespaceManager);
+
+                if (null == postBuildEventNode)
+                {
+                    // Inject Target node directly inside Project node
+                    XmlElement afterBuildEventNode = document.CreateElement("Target", @"http://schemas.microsoft.com/developer/msbuild/2003");
+                    afterBuildEventNode.SetAttribute("Name", "AfterBuild");
+                    document.DocumentElement.AppendChild(afterBuildEventNode);
+
+                    // Inject Exec mode inside the Target node
+                    XmlElement execElementNode = document.CreateElement("Exec", @"http://schemas.microsoft.com/developer/msbuild/2003");
+                    execElementNode.SetAttribute("Command", @"Fadm install $(TargetPath)");
+                    afterBuildEventNode.AppendChild(execElementNode);
+
+                    // Save the file to the file system
+                    document.Save(path);
+                }
+
+                // Return the execution reuslt
+                return new ExecutionResult(string.Format("Fadm added to '{0}'", path));
+            }
+            catch (Exception exception)
+            {
+                //  Return the execution result
+                return new ExecutionResult(exception.Message);
+            }
         }
 
         /// <summary>

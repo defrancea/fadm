@@ -81,8 +81,8 @@ namespace Fadm.CommandLine
         /// <param name="add">The add command containing the user input.</param>
         public void Add(AddCommand add)
         {
-            // Todo: implement
-            Console.WriteLine("Add");
+            ExecutionResult result = this.FadmEngine.Add(add.FilePath);
+            Console.WriteLine(result.Message);
         }
 
         /// <summary>
