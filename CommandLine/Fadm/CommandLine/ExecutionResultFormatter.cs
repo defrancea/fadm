@@ -17,6 +17,7 @@
  * MA 02110-1301  USA
  */
 
+using System;
 using System.Text;
 using Fadm.Core;
 
@@ -43,6 +44,20 @@ namespace Fadm.CommandLine.Mapping
         /// <returns>A stirng builder containing the formatted execution result.</returns>
         private StringBuilder Format(StringBuilder stringBuilder, ExecutionResult executionResult, int depth)
         {
+            // Data validation
+            if (null == stringBuilder)
+            {
+                throw new ArgumentException("stringBuilder must not be null.");
+            }
+            if (null == executionResult)
+            {
+                throw new ArgumentException("executionResult must not be null.");
+            }
+            if (0 > depth)
+            {
+                throw new ArgumentException("depth must not be positive.");
+            }
+
             // Append current execution result to the builder
             stringBuilder.AppendLine(string.Format("{0}[{1}] {2}", new string('\t', depth), executionResult.Status, executionResult.Message));
 
