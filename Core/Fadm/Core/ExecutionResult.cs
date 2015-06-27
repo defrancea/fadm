@@ -35,6 +35,11 @@ namespace Fadm.Core
         public string Message { get; private set; }
 
         /// <summary>
+        /// The sub execution results.
+        /// </summary>
+        public ExecutionResult[] SubExecutionResults { get; private set; }
+
+        /// <summary>
         /// Initializes a new instance of <see cref="ExecutionResult"/>.
         /// </summary>
         /// <param name="status">The execution result status.</param>
@@ -43,6 +48,20 @@ namespace Fadm.Core
         {
             this.Status = status;
             this.Message = message;
+            this.SubExecutionResults = new ExecutionResult[0];
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="ExecutionResult"/> containing sub task.
+        /// </summary>
+        /// <param name="status">The execution result status.</param>
+        /// <param name="message">The execution result message.</param>
+        /// <param name="subExecutionResults">The sub execution results.</param>
+        public ExecutionResult(ExecutionResultStatus status, string message, ExecutionResult[] subExecutionResults)
+        {
+            this.Status = status;
+            this.Message = message;
+            this.SubExecutionResults = subExecutionResults;
         }
     }
 }
