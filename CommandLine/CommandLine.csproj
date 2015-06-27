@@ -7,8 +7,8 @@
     <ProjectGuid>{BAD5709A-7EC1-4D55-9FE8-0CCC82604DCE}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CommandLine</RootNamespace>
-    <AssemblyName>CommandLine</AssemblyName>
+    <RootNamespace>Fadm</RootNamespace>
+    <AssemblyName>Fadm</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <PublishUrl>publish\</PublishUrl>
