@@ -16,33 +16,22 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA 02110-1301  USA
  */
- 
+
 namespace Fadm.Core
 {
     /// <summary>
-    /// Represents an execution result providing more context to the calling code.
+    /// Represents an execution result status specifying whether it succedded.
     /// </summary>
-    public class ExecutionResult
+    public enum ExecutionResultStatus : int
     {
         /// <summary>
-        /// The status specifying whether it worked.
+        /// The execution succedded.
         /// </summary>
-        public ExecutionResultStatus Status { get; private set; }
+        Success = 0,
 
         /// <summary>
-        /// The message containing a description of what happened.
+        /// The execution failed.
         /// </summary>
-        public string Message { get; private set; }
-
-        /// <summary>
-        /// Initializes a new instance of <see cref="ExecutionResult"/>.
-        /// </summary>
-        /// <param name="status">The execution result status.</param>
-        /// <param name="message">The execution result message</param>
-        public ExecutionResult(ExecutionResultStatus status, string message)
-        {
-            this.Status = status;
-            this.Message = message;
-        }
+        Error = 1
     }
 }

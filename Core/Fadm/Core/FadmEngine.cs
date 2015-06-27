@@ -40,14 +40,14 @@ namespace Fadm.Core
             // Validate file existence
             if (!File.Exists(path))
             {
-                return new ExecutionResult(string.Format("The file '{0}' doesn't exist", path));
+                return new ExecutionResult(ExecutionResultStatus.Error, string.Format("The file '{0}' doesn't exist", path));
             }
 
             // Only dll file supported for now
             string extension = Path.GetExtension(path);
             if (".dll" != extension)
             {
-                return new ExecutionResult(string.Format("The file '{0}' is not a dll", path));
+                return new ExecutionResult(ExecutionResultStatus.Error, string.Format("The file '{0}' is not a dll", path));
             }
 
             // Ensure that the repository exists
@@ -68,7 +68,7 @@ namespace Fadm.Core
             File.Copy(path, Path.Combine(dependencyPath, dllFileTarget), true);
 
             // Return execution result
-            return new ExecutionResult(string.Format("File installed to '{0}'", dllFileTarget));
+            return new ExecutionResult(ExecutionResultStatus.Success, string.Format("File installed to '{0}'", dllFileTarget));
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace Fadm.Core
             // Validate file existence
             if (!File.Exists(path))
             {
-                return new ExecutionResult(string.Format("The file '{0}' doesn't exist", path));
+                return new ExecutionResult(ExecutionResultStatus.Error, string.Format("The file '{0}' doesn't exist", path));
             }
 
             // If the file is not a solution file, directly process the file
@@ -118,7 +118,7 @@ namespace Fadm.Core
             }
 
             // Return execution result.
-            return new ExecutionResult(string.Format("Solution '{0}' processed", path));
+            return new ExecutionResult(ExecutionResultStatus.Success, string.Format("Solution '{0}' processed", path));
         }
 
         /// <summary>
@@ -156,12 +156,12 @@ namespace Fadm.Core
                 }
 
                 // Return the execution reuslt
-                return new ExecutionResult(string.Format("Fadm added to '{0}'", path));
+                return new ExecutionResult(ExecutionResultStatus.Success, string.Format("Fadm added to '{0}'", path));
             }
             catch (Exception exception)
             {
                 //  Return the execution result
-                return new ExecutionResult(exception.Message);
+                return new ExecutionResult(ExecutionResultStatus.Error, exception.Message);
             }
         }
 

@@ -40,6 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Fadm\Core\ExecutionResult.cs" />
+    <Compile Include="Fadm\Core\ExecutionResultStatus.cs" />
     <Compile Include="Fadm\Core\FadmEngine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
