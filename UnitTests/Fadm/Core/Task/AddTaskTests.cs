@@ -127,7 +127,10 @@ namespace Fadm.CommandLine
 
             // After build execution added by Fadm
             XmlNode postBuildEventNode = document.SelectSingleNode(@"//ns:Project/ns:Target[@Name='AfterBuild']/ns:Exec[@Command='Fadm install $(TargetPath)']", namespaceManager);
-            return (null != postBuildEventNode);
+            XmlNode buildImportNode = document.SelectSingleNode(@"//ns:Project/ns:Import[@Project='$(MSBuildToolsPath)\Microsoft.CSharp.targets']", namespaceManager);
+
+            // Return true if both nodes are in the document
+            return (null != postBuildEventNode && null != buildImportNode);
         }
     }
 }

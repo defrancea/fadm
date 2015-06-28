@@ -123,6 +123,9 @@ namespace Fadm.Core.Task
                     return new ExecutionResult(ExecutionResultStatus.Warning, string.Format("Fadm already in '{0}'", path));
                 }
 
+                // Generate build import
+                EnsureBuildImport(document, namespaceManager);
+
                 // Generate target node if needed
                 XmlNode postBuildEventNode = EnsureTargetAfterBuild(document, namespaceManager);
 
@@ -139,6 +142,33 @@ namespace Fadm.Core.Task
             {
                 //  Return the execution result
                 return new ExecutionResult(ExecutionResultStatus.Error, exception.Message);
+            }
+        }
+
+        /// <summary>
+        /// Ensures that the document conains an after build target.
+        /// </summary>
+        /// <param name="document">The xml document.</param>
+        /// <param name="namespaceManager">The namespace manager.</param>
+        /// <returns>After build target node.</returns>
+        private XmlNode EnsureBuildImport(XmlDocument document, XmlNamespaceManager namespaceManager)
+        {
+            // Retrieve the node using xpath
+            XmlNode buildImportNode = document.SelectSingleNode(@"//ns:Project/ns:Import[@Project='$(MSBuildToolsPath)\Microsoft.CSharp.targets']", namespaceManager);
+
+            // Return it as it
+            if (null != buildImportNode)
+            {
+                return buildImportNode;
+            }
+
+            // Or create it if it doesn't exist
+            else
+            {
+                XmlElement createdBuildImportNode = document.CreateElement("Import", msBuildNamespace);
+                createdBuildImportNode.SetAttribute("Project", @"$(MSBuildToolsPath)\Microsoft.CSharp.targets");
+                document.DocumentElement.AppendChild(createdBuildImportNode);
+                return createdBuildImportNode;
             }
         }
 
@@ -211,7 +241,10 @@ namespace Fadm.Core.Task
 
             // After build execution added by Fadm
             XmlNode postBuildEventNode = document.SelectSingleNode(@"//ns:Project/ns:Target[@Name='AfterBuild']/ns:Exec[@Command='Fadm install $(TargetPath)']", namespaceManager);
-            return (null != postBuildEventNode);
+            XmlNode buildImportNode = document.SelectSingleNode(@"//ns:Project/ns:Import[@Project='$(MSBuildToolsPath)\Microsoft.CSharp.targets']", namespaceManager);
+
+            // Return true if both nodes are in the document
+            return (null != postBuildEventNode && null != buildImportNode);
         }
     }
 }
