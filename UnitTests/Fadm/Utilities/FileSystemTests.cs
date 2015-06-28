@@ -30,6 +30,20 @@ namespace Fadm.Utilities
     public class FileSystemTests
     {
         /// <summary>
+        /// Initializes <see cref="FileSystemTests"/>.
+        /// </summary>
+        [SetUp]
+        [TearDown]
+        public void Initialize()
+        {
+            string folderName = "TestFolder";
+            if (Directory.Exists(folderName))
+            {
+                Directory.Delete(folderName, true);
+            }
+        }
+
+        /// <summary>
         /// Tests EnsureExistingDirectory(string) with null value.
         /// </summary>
         [Test]
@@ -50,6 +64,18 @@ namespace Fadm.Utilities
             FileSystem.EnsureExistingDirectory(folderName);
             Assert.AreEqual(true, Directory.Exists(folderName));
             Directory.Delete(folderName);
+        }
+
+        /// <summary>
+        /// Tests EnsureExistingDirectory(string) with value.
+        /// </summary>
+        [Test]
+        public void EnsureExistingDirectoryNotNullTwoLevels()
+        {
+            string folderName = "TestFolder/TestSubFolder";
+            Assert.AreEqual(false, Directory.Exists(folderName));
+            FileSystem.EnsureExistingDirectory(folderName);
+            Assert.AreEqual(true, Directory.Exists(folderName));
         }
     }
 }

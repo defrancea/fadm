@@ -54,7 +54,8 @@
   <ItemGroup>
     <Compile Include="Fadm\CommandLine\FadmCommandLineProgramTests.cs" />
     <Compile Include="Fadm\CommandLine\ExecutionResultFormatterTests.cs" />
-    <Compile Include="Fadm\Utilities\FileSystem.cs" />
+    <Compile Include="Fadm\Core\Task\InstallTaskTests.cs" />
+    <Compile Include="Fadm\Utilities\FileSystemTests.cs" />
     <Compile Include="Fadm\Utilities\ValidateTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -76,6 +77,11 @@
       <Project>{22afbcc8-ca90-46f2-b35a-424baccf4ab0}</Project>
       <Name>Utilities</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="UTSample.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

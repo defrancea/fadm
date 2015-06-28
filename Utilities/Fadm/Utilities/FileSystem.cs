@@ -17,6 +17,7 @@
  * MA 02110-1301  USA
  */
 
+using System;
 using System.IO;
 
 namespace Fadm.Utilities
@@ -37,6 +38,50 @@ namespace Fadm.Utilities
             {
                 Directory.CreateDirectory(path);
             }
+        }
+
+        /// <summary>
+        /// Computes the local repository path.
+        /// </summary>
+        public static string ComputeReporitoryPath()
+        {
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".fadm", "repository");
+        }
+
+        /// <summary>
+        /// Computes the dependency directory path based on name and version.
+        /// </summary>
+        /// <param name="name">The name of the dependency.</param>
+        /// <param name="version">The version of the dependency.</param>
+        /// <returns>The computed dependency path in the local repository.</returns>
+        public static string ComputeDependencyDirectoryPath(string name, string version)
+        {
+            // Input validation
+            Validate.IsNotNullOrWhitespace(name, "name must not be null.");
+            Validate.IsNotNullOrWhitespace(version, "version must not be null.");
+
+            // Return the computed value
+            return Path.Combine(ComputeReporitoryPath(), name, version);
+        }
+
+        /// <summary>
+        /// Computes the dependency file path based on name and version.
+        /// </summary>
+        /// <param name="name">The name of the dependency.</param>
+        /// <param name="version">The version of the dependency.</param>
+        /// <param name="extension">The extension.</param>
+        /// <returns>The computed dependency path in the local repository.</returns>
+        public static string ComputeDependencyFilePath(string name, string version, string extension)
+        {
+            // Input validation
+            Validate.IsNotNullOrWhitespace(name, "name must not be null.");
+            Validate.IsNotNullOrWhitespace(version, "version must not be null.");
+            Validate.IsNotNullOrWhitespace(extension, "extension must not be null.");
+
+            string fileTarget = string.Format("{0}-{1}.{2}", name, version, extension);
+
+            // Return the computed value
+            return Path.Combine(ComputeDependencyDirectoryPath(name, version), fileTarget);
         }
     }
 }

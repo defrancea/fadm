@@ -17,7 +17,6 @@
  * MA 02110-1301  USA
  */
 
-using System;
 using System.IO;
 using System.Reflection;
 using Fadm.Utilities;
@@ -53,8 +52,7 @@ namespace Fadm.Core.Task
             }
 
             // Ensure that the repository exists
-            string localRepositoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".fadm", "repository");
-            FileSystem.EnsureExistingDirectory(localRepositoryPath);
+            FileSystem.EnsureExistingDirectory(FileSystem.ComputeReporitoryPath());
 
             // Load the assembly an retrieve information
             Assembly assembly = Assembly.LoadFrom(path);
@@ -62,15 +60,15 @@ namespace Fadm.Core.Task
             string version = assembly.GetName().Version.ToString();
 
             // Compute the target path and ensure the dependency path existing in the local repository
-            string dependencyPath = Path.Combine(localRepositoryPath, name, version);
+            string dependencyPath = FileSystem.ComputeDependencyDirectoryPath(name, version);
             FileSystem.EnsureExistingDirectory(dependencyPath);
 
             // Copy the dll to the local repository
-            string dllFileTarget = string.Format("{0}-{1}.dll", name, version);
-            File.Copy(path, Path.Combine(dependencyPath, dllFileTarget), true);
+            string fileTarget = FileSystem.ComputeDependencyFilePath(name, version, "dll");
+            File.Copy(path, Path.Combine(dependencyPath, fileTarget), true);
 
             // Return execution result
-            return new ExecutionResult(ExecutionResultStatus.Success, string.Format("File installed to '{0}'", dllFileTarget));
+            return new ExecutionResult(ExecutionResultStatus.Success, string.Format("File installed to '{0}'", fileTarget));
         }
     }
 }
