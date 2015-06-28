@@ -32,6 +32,11 @@ namespace Fadm.Core
         /// <summary>
         /// The execution failed.
         /// </summary>
-        Error = 1
+        Error = 1,
+
+        /// <summary>
+        /// The execution completeted with warning.
+        /// </summary>
+        Warning = 2
     }
 }

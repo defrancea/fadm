@@ -27,7 +27,7 @@ using NUnit.Framework;
 namespace Fadm.CommandLine
 {
     /// <summary>
-    /// Tests AddTask.
+    /// Tests InstallTask.
     /// </summary>
     [TestFixture]
     public class InstallTaskTests
@@ -86,7 +86,7 @@ namespace Fadm.CommandLine
         }
 
         /// <summary>
-        /// Tests Install(string) with null value.
+        /// Tests Install(string) with xml value.
         /// </summary>
         [Test]
         public void InstallNotDll()
@@ -96,7 +96,7 @@ namespace Fadm.CommandLine
         }
 
         /// <summary>
-        /// Tests Format(ExecutionResult) with null value.
+        /// Tests Install(string) with correct value.
         /// </summary>
         [Test]
         public void InstallSuccess()
