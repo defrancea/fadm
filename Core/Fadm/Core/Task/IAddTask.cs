@@ -17,14 +17,18 @@
  * MA 02110-1301  USA
  */
 
-using Fadm.Core.Task;
-
-namespace Fadm.Core
+namespace Fadm.Core.Task
 {
     /// <summary>
-    /// Fadm engine handling external operations.
+    /// The add task in charge of adding Fadm to solutions and project files.
     /// </summary>
-    public interface IFadmEngine : IAddTask, IInstallTask
+    public interface IAddTask
     {
+        /// <summary>
+        /// Adds Fadm installer to a solution or a project file.
+        /// </summary>
+        /// <param name="path">The file to add the installer to.</param>
+        /// <returns>The execution result.</returns>
+        ExecutionResult Add(string path);
     }
 }

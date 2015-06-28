@@ -37,6 +37,16 @@ namespace Fadm.Utilities
         }
 
         /// <summary>
+        /// Validates that the received string is not null or whitespace.
+        /// </summary>
+        /// <param name="obj">The string to check.</param>
+        /// <param name="message">The message to display if the error is thrown.</param>
+        public static void IsNotNullOrWhitespace(string str, string message)
+        {
+            IsTrue(!string.IsNullOrWhiteSpace(str), message);
+        }
+
+        /// <summary>
         /// Validates that the check succedded.
         /// </summary>
         /// <param name="check">The check.</param>

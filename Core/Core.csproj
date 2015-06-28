@@ -43,9 +43,18 @@
     <Compile Include="Fadm\Core\ExecutionResultStatus.cs" />
     <Compile Include="Fadm\Core\FadmEngine.cs" />
     <Compile Include="Fadm\Core\IFadmEngine.cs" />
+    <Compile Include="Fadm\Core\Task\AddTask.cs" />
+    <Compile Include="Fadm\Core\Task\IAddTask.cs" />
+    <Compile Include="Fadm\Core\Task\IInstallTask.cs" />
+    <Compile Include="Fadm\Core\Task\InstallTask.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\Utilities\Utilities.csproj">
+      <Project>{22afbcc8-ca90-46f2-b35a-424baccf4ab0}</Project>
+      <Name>Utilities</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -16,7 +16,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA 02110-1301  USA
  */
- 
+
+using Fadm.Utilities;
+
 namespace Fadm.Core
 {
     /// <summary>
@@ -46,6 +48,10 @@ namespace Fadm.Core
         /// <param name="message">The execution result message</param>
         public ExecutionResult(ExecutionResultStatus status, string message)
         {
+            // Input validation
+            Validate.IsNotNull(message, "message must not be null.");
+
+            // Initialize
             this.Status = status;
             this.Message = message;
             this.SubExecutionResults = new ExecutionResult[0];
@@ -58,9 +64,12 @@ namespace Fadm.Core
         /// <param name="message">The execution result message.</param>
         /// <param name="subExecutionResults">The sub execution results.</param>
         public ExecutionResult(ExecutionResultStatus status, string message, ExecutionResult[] subExecutionResults)
+            : this(status, message)
         {
-            this.Status = status;
-            this.Message = message;
+            // Input validation
+            Validate.IsNotNull(subExecutionResults, "subExecutionResults must not be null");
+
+            // Initialize
             this.SubExecutionResults = subExecutionResults;
         }
     }

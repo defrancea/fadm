@@ -54,6 +54,7 @@
   <ItemGroup>
     <Compile Include="Fadm\CommandLine\FadmCommandLineProgramTests.cs" />
     <Compile Include="Fadm\CommandLine\ExecutionResultFormatterTests.cs" />
+    <Compile Include="Fadm\Utilities\FileSystem.cs" />
     <Compile Include="Fadm\Utilities\ValidateTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -17,14 +17,26 @@
  * MA 02110-1301  USA
  */
 
-using Fadm.Core.Task;
+using System.IO;
 
-namespace Fadm.Core
+namespace Fadm.Utilities
 {
-    /// <summary>
-    /// Fadm engine handling external operations.
-    /// </summary>
-    public interface IFadmEngine : IAddTask, IInstallTask
+    public class FileSystem
     {
+        /// <summary>
+        /// Ensures that a directory exists.
+        /// </summary>
+        /// <param name="path">The direcotry path.</param>
+        public static void EnsureExistingDirectory(string path)
+        {
+            // Input validation
+            Validate.IsNotNullOrWhitespace(path, "path must not be null.");
+
+            // Check the file system and create the directory if needed.
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+        }
     }
 }

@@ -23,7 +23,7 @@ using NUnit.Framework;
 namespace Fadm.Utilities
 {
     /// <summary>
-    /// Tests ValidateTests.
+    /// Tests Validate.
     /// </summary>
     [TestFixture]
     public class ValidateTests
@@ -45,6 +45,45 @@ namespace Fadm.Utilities
         public void IsNotNullNotNull()
         {
             Validate.IsNotNull(new object(), "Foo");
+        }
+
+        /// <summary>
+        /// Tests IsNotNullOrWhitespace(object, string) with null value.
+        /// </summary>
+        [Test]
+        [ExpectedException(typeof(ArgumentException), ExpectedMessage = "Foo")]
+        public void IsNotNullOrWhiteSpaceNull()
+        {
+            Validate.IsNotNullOrWhitespace(null, "Foo");
+        }
+
+        /// <summary>
+        /// Tests IsNotNullOrWhitespace(object, string) with empty value.
+        /// </summary>
+        [Test]
+        [ExpectedException(typeof(ArgumentException), ExpectedMessage = "Foo")]
+        public void IsNotNullOrWhiteSpaceEmpty()
+        {
+            Validate.IsNotNullOrWhitespace(string.Empty, "Foo");
+        }
+
+        /// <summary>
+        /// Tests IsNotNullOrWhitespace(object, string) with whitespace value.
+        /// </summary>
+        [Test]
+        [ExpectedException(typeof(ArgumentException), ExpectedMessage = "Foo")]
+        public void IsNotNullOrWhiteSpaceWhitespace()
+        {
+            Validate.IsNotNullOrWhitespace("    ", "Foo");
+        }
+
+        /// <summary>
+        /// Tests IsNotNullOrWhitespace(object, string) with data.
+        /// </summary>
+        [Test]
+        public void IsNotNullOrWhiteSpaceWithData()
+        {
+            Validate.IsNotNullOrWhitespace("some content", "Foo");
         }
 
         /// <summary>

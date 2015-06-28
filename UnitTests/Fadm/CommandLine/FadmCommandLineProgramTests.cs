@@ -25,7 +25,7 @@ using NUnit.Framework;
 namespace Fadm.CommandLine
 {
     /// <summary>
-    /// Tests FadmCommandLineProgramTests.
+    /// Tests FadmCommandLineProgram.
     /// </summary>
     [TestFixture]
     public class FadmCommandLineProgramTests

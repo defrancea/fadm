@@ -17,14 +17,18 @@
  * MA 02110-1301  USA
  */
 
-using Fadm.Core.Task;
-
-namespace Fadm.Core
+namespace Fadm.Core.Task
 {
     /// <summary>
-    /// Fadm engine handling external operations.
+    /// The install task in charge of installing ressources to the local storage.
     /// </summary>
-    public interface IFadmEngine : IAddTask, IInstallTask
+    public interface IInstallTask
     {
+        /// <summary>
+        /// Installs a file to the local repository.
+        /// </summary>
+        /// <param name="path">The file path to install.</param>
+        /// <returns>The execution result.</returns>
+        ExecutionResult Install(string path);
     }
 }
