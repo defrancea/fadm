@@ -101,10 +101,10 @@ namespace Fadm.CommandLine
         [Test]
         public void InstallSuccess()
         {
-            Assert.AreEqual(true, File.Exists("UTSample.dll"));
+            Assert.AreEqual(true, File.Exists("Ressources/UTSample.dll"));
             Assert.AreEqual(false, Directory.Exists(DependencyDirectoryPath));
             Assert.AreEqual(false, File.Exists(DependencyFilePath));
-            ExecutionResult result = InstallTask.Install("UTSample.dll");
+            ExecutionResult result = InstallTask.Install("Ressources/UTSample.dll");
             Assert.AreEqual(ExecutionResultStatus.Success, result.Status);
             Assert.AreEqual(true, Directory.Exists(DependencyDirectoryPath));
             Assert.AreEqual(true, File.Exists(DependencyFilePath));

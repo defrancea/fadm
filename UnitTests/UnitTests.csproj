@@ -79,10 +79,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="UTSample.dll">
+    <Content Include="Ressources\UTSample.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>
