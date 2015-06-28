@@ -23,7 +23,10 @@ using Fadm.Utilities;
 
 namespace Fadm.CommandLine.Mapping
 {
-    public class ExecutionResultFormatter
+    /// <summary>
+    /// Formats execution result to a string.
+    /// </summary>
+    public class ExecutionResultFormatter : IExecutionResultFormatter
     {
         /// <summary>
         /// Formats an execution result.
@@ -44,7 +47,7 @@ namespace Fadm.CommandLine.Mapping
         /// <returns>A stirng builder containing the formatted execution result.</returns>
         private StringBuilder Format(StringBuilder stringBuilder, ExecutionResult executionResult, int depth)
         {
-            // Data validation
+            // Input validation
             Validate.IsNotNull(stringBuilder, "stringBuilder must not be null.");
             Validate.IsNotNull(executionResult, "executionResult must not be null.");
             Validate.IsTrue(0 <= depth, "depth must be positive.");

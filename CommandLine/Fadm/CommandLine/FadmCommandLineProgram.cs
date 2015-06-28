@@ -21,6 +21,7 @@ using System;
 using CommandLine;
 using Fadm.CommandLine.Mapping;
 using Fadm.Core;
+using Fadm.Utilities;
 
 namespace Fadm.CommandLine
 {
@@ -36,27 +37,35 @@ namespace Fadm.CommandLine
         /// <param name="args">The console arguments.</param>
         public static void Main(string[] args)
         {
-            new FadmCommandLineProgram().Execute(args);
+            new FadmCommandLineProgram(
+                new FadmEngine(),
+                new ExecutionResultFormatter())
+                .Execute(args);
         }
 
         /// <summary>
         /// The engine doing all operation.
         /// </summary>
-        public FadmEngine FadmEngine { get; private set; }
+        public IFadmEngine Engine { get; private set; }
 
         /// <summary>
         /// The execution result formatter.
         /// </summary>
         /// <returns></returns>
-        public ExecutionResultFormatter Formatter { get; private set; }
+        public IExecutionResultFormatter Formatter { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of <see cref="FadmCommandLineProgram"/>.
         /// </summary>
-        public FadmCommandLineProgram()
+        public FadmCommandLineProgram(IFadmEngine engine, IExecutionResultFormatter formatter)
         {
-            this.FadmEngine = new FadmEngine();
-            this.Formatter = new ExecutionResultFormatter();
+            // Input validation
+            Validate.IsNotNull(engine, "engine must not be null.");
+            Validate.IsNotNull(formatter, "formatter must not be null.");
+
+            // Initialize
+            this.Engine = engine;
+            this.Formatter = formatter;
         }
 
         /// <summary>
@@ -65,6 +74,9 @@ namespace Fadm.CommandLine
         /// <param name="args">The console arguments.</param>
         public void Execute(string[] args)
         {
+            // Input validation
+            Validate.IsNotNull(args, "args must not be null.");
+
             // Parse the program arguments and provide a callback in order to handle the proper command
             Parser.Default.ParseArgumentsStrict(args, new FadmCommand(), (verb, executedCommand) =>
             {
@@ -88,7 +100,7 @@ namespace Fadm.CommandLine
         /// <param name="add">The add command containing the user input.</param>
         public void Add(AddCommand add)
         {
-            ExecutionResult result = this.FadmEngine.Add(add.FilePath);
+            ExecutionResult result = this.Engine.Add(add.FilePath);
             Console.WriteLine(Formatter.Format(result));
         }
 
@@ -98,7 +110,7 @@ namespace Fadm.CommandLine
         /// <param name="install">The install method containing the user input.</param>
         public void Install(InstallCommand install)
         {
-            ExecutionResult result = this.FadmEngine.Install(install.FilePath);
+            ExecutionResult result = this.Engine.Install(install.FilePath);
             Console.WriteLine(Formatter.Format(result));
         }
     }

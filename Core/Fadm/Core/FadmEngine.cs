@@ -27,9 +27,9 @@ using System.Xml;
 namespace Fadm.Core
 {
     /// <summary>
-    /// Fadm entry point.
+    /// Fadm engine handling external operations.
     /// </summary>
-    public class FadmEngine
+    public class FadmEngine : IFadmEngine
     {
         /// <summary>
         /// Installs a file to the local repository.

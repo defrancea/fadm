@@ -36,7 +36,7 @@ namespace Fadm.CommandLine
         public ExecutionResultFormatter Formatter { get; private set; }
 
         /// <summary>
-        /// Initializes a new instance of <see cref="ExecutionResultFormatterTests"/>.
+        /// Initializes <see cref="ExecutionResultFormatterTests"/>.
         /// </summary>
         [SetUp]
         public void Initialize()
