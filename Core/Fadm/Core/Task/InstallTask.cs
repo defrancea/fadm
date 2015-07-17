@@ -38,6 +38,9 @@ namespace Fadm.Core.Task
             // Input validation
             Validate.IsNotNullOrWhitespace(path, "path must not be null.");
 
+            // Ensure the path is absolute
+            path = Path.GetFullPath(path);
+
             // Validate file existence
             if (!File.Exists(path))
             {
@@ -55,7 +58,7 @@ namespace Fadm.Core.Task
             FileSystem.EnsureExistingDirectory(FileSystem.ComputeReporitoryPath());
 
             // Load the assembly an retrieve information
-            Assembly assembly = Assembly.LoadFrom(path);
+            Assembly assembly = Assembly.LoadFile(path);
             string name = assembly.GetName().Name;
             string version = assembly.GetName().Version.ToString();
 
