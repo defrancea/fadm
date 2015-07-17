@@ -54,28 +54,17 @@ namespace Fadm.Utilities
         }
 
         /// <summary>
-        /// Tests EnsureExistingDirectory(string) with value.
+        /// Tests EnsureExistingDirectory(string).
         /// </summary>
         [Test]
-        public void EnsureExistingDirectoryNotNullOneLevel()
+        [TestCase("TestFolder")]
+        [TestCase("TestFolder/TestSubFolder")]
+        public void EnsureExistingDirectoryNotNullOneLevel(string folderName)
         {
-            string folderName = "TestFolder";
             Assert.AreEqual(false, Directory.Exists(folderName));
             FileSystem.EnsureExistingDirectory(folderName);
             Assert.AreEqual(true, Directory.Exists(folderName));
             Directory.Delete(folderName);
-        }
-
-        /// <summary>
-        /// Tests EnsureExistingDirectory(string) with value.
-        /// </summary>
-        [Test]
-        public void EnsureExistingDirectoryNotNullTwoLevels()
-        {
-            string folderName = "TestFolder/TestSubFolder";
-            Assert.AreEqual(false, Directory.Exists(folderName));
-            FileSystem.EnsureExistingDirectory(folderName);
-            Assert.AreEqual(true, Directory.Exists(folderName));
         }
     }
 }

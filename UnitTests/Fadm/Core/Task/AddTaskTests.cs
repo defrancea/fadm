@@ -58,58 +58,21 @@ namespace Fadm.CommandLine
         }
 
         /// <summary>
-        /// Tests Add(string) with value no target.
+        /// Tests Add(string).
         /// </summary>
         [Test]
-        public void AddNoTarget()
+        [TestCase(false, ExecutionResultStatus.Success, "Ressources/NoTarget.csproj")]
+        [TestCase(false, ExecutionResultStatus.Success, "Ressources/TargetNoExec.csproj")]
+        [TestCase(false, ExecutionResultStatus.Success, "Ressources/TargetAnotherExec.csproj")]
+        [TestCase(true,  ExecutionResultStatus.Warning, "Ressources/AlreadyAdded.csproj")]
+        public void Add(bool alreadyExist, ExecutionResultStatus executionResultStatus, string sourceFile)
         {
-            File.Copy("Ressources/NoTarget.csproj", "Ressources/NoTargetCopy.csproj", true);
-            string fileName = "Ressources/NoTargetCopy.csproj";
-            Assert.AreEqual(false, IsFadmAdded(fileName));
-            ExecutionResult result = AddTask.Add(fileName);
-            Assert.AreEqual(ExecutionResultStatus.Success, result.Status);
-            Assert.AreEqual(true, IsFadmAdded(fileName));
-        }
-
-        /// <summary>
-        /// Tests Add(string) with value no exec.
-        /// </summary>
-        [Test]
-        public void AddTargetNoExec()
-        {
-            File.Copy("Ressources/TargetNoExec.csproj", "Ressources/TargetNoExecCopy.csproj", true);
-            string fileName = "Ressources/TargetNoExecCopy.csproj";
-            Assert.AreEqual(false, IsFadmAdded(fileName));
-            ExecutionResult result = AddTask.Add(fileName);
-            Assert.AreEqual(ExecutionResultStatus.Success, result.Status);
-            Assert.AreEqual(true, IsFadmAdded(fileName));
-        }
-
-        /// <summary>
-        /// Tests Install(string) with value another exec.
-        /// </summary>
-        [Test]
-        public void AddTargetAnotherExec()
-        {
-            File.Copy("Ressources/TargetAnotherExec.csproj", "Ressources/TargetAnotherExecCopy.csproj", true);
-            string fileName = "Ressources/TargetAnotherExecCopy.csproj";
-            Assert.AreEqual(false, IsFadmAdded(fileName));
-            ExecutionResult result = AddTask.Add(fileName);
-            Assert.AreEqual(ExecutionResultStatus.Success, result.Status);
-            Assert.AreEqual(true, IsFadmAdded(fileName));
-        }
-
-        /// <summary>
-        /// Tests Install(string) with value Fadm already added.
-        /// </summary>
-        [Test]
-        public void AddTargetAlreadyThere()
-        {
-            string fileName = "Ressources/AlreadyAdded.csproj";
-            Assert.AreEqual(true, IsFadmAdded(fileName));
-            ExecutionResult result = AddTask.Add(fileName);
-            Assert.AreEqual(ExecutionResultStatus.Warning, result.Status);
-            Assert.AreEqual(true, IsFadmAdded(fileName));
+            string destinationFile = sourceFile.Replace(".csproj", "Copy.csproj");
+            File.Copy(sourceFile, destinationFile, true);
+            Assert.AreEqual(alreadyExist, IsFadmAdded(destinationFile));
+            ExecutionResult result = AddTask.Add(destinationFile);
+            Assert.AreEqual(executionResultStatus, result.Status);
+            Assert.AreEqual(true, IsFadmAdded(destinationFile));
         }
 
         /// <summary>
