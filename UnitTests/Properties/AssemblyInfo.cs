@@ -17,8 +17,11 @@
  * MA 02110-1301  USA
  */
 
+#if DEBUG
+#warning Use Release configuration for running unit tests.
+#endif 
+
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
