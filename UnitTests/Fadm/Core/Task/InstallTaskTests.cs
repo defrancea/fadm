@@ -77,6 +77,7 @@ namespace Fadm.CommandLine
         [Test]
         [TestCase("Ressources/UTSample", "UTSampleDependency", "1.0.0.0", "dll")]
         [TestCase("Ressources/UTSample", "Test", "1.0.0.0", "exe")]
+        [TestCase("Ressources/UTSampleWithPdb", "WithPdb", "1.0.0.0", "dll")]
         public void InstallSuccess(string ressourceFile, string dependencyName, string dependencyVersion, string dependencyExtension)
         {
             // Compute dependency path

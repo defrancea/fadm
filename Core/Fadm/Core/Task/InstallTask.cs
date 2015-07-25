@@ -32,7 +32,12 @@ namespace Fadm.Core.Task
         /// <summary>
         /// Defines the allowed extensions.
         /// </summary>
-        private readonly string[] allowedExtensions = { ".dll", ".exe" };
+        private string[] allowedExtensions = { ".dll", ".exe" };
+
+        /// <summary>
+        /// PDB extension.
+        /// </summary>
+        private const string PDB_EXTENSION = ".pdb";
 
         /// <summary>
         /// Installs a file to the local repository.
@@ -72,9 +77,16 @@ namespace Fadm.Core.Task
             string dependencyPath = FileSystem.ComputeDependencyDirectoryPath(name, version);
             FileSystem.EnsureExistingDirectory(dependencyPath);
 
-            // Copy the dll to the local repository
+            // Copy the dependency to the local repository
             string fileTarget = FileSystem.ComputeDependencyFilePath(name, version, extension.Substring(1));
             File.Copy(path, Path.Combine(dependencyPath, fileTarget), true);
+
+            // Copy the pdb if available
+            string pdbPath = Path.ChangeExtension(path, PDB_EXTENSION);
+            if (File.Exists(pdbPath))
+            {
+                File.Copy(pdbPath, Path.Combine(dependencyPath, Path.ChangeExtension(fileTarget, PDB_EXTENSION)), true);
+            }
 
             // Return execution result
             return new ExecutionResult(ExecutionResultStatus.Success, string.Format("File installed to '{0}'", fileTarget));
