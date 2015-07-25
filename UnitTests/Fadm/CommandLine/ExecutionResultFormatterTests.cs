@@ -18,6 +18,7 @@
  */
 
 using System;
+using System.Globalization;
 using Fadm.CommandLine.Mapping;
 using Fadm.Core;
 using NUnit.Framework;
@@ -61,7 +62,7 @@ namespace Fadm.CommandLine
         public void FormatOneLevel()
         {
             Assert.AreEqual(
-                "[Success] Nice message\r\n",
+                string.Format(CultureInfo.InvariantCulture, "[Success] Nice message{0}", Environment.NewLine),
                 Formatter.Format(new ExecutionResult(ExecutionResultStatus.Success, "Nice message")));
         }
 
@@ -72,7 +73,7 @@ namespace Fadm.CommandLine
         public void FormatNestedEmptyChildren()
         {
             Assert.AreEqual(
-                "[Success] Nice message\r\n",
+                string.Format(CultureInfo.InvariantCulture, "[Success] Nice message{0}", Environment.NewLine),
                 Formatter.Format(
                     new ExecutionResult(
                         ExecutionResultStatus.Success,
@@ -86,8 +87,13 @@ namespace Fadm.CommandLine
         [Test]
         public void FormatNestedChildren()
         {
+            string outputMessage = string.Format(
+                    CultureInfo.InvariantCulture,
+                    "[Success] Nice message{0}\t[Error] This one failed{0}\t[Success] This one worked{0}",
+                    Environment.NewLine);
+
             Assert.AreEqual(
-                "[Success] Nice message\r\n\t[Error] This one failed\r\n\t[Success] This one worked\r\n",
+                outputMessage,
                 Formatter.Format(
                     new ExecutionResult(
                         ExecutionResultStatus.Success,
