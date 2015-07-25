@@ -61,12 +61,13 @@ namespace Fadm.CommandLine
         /// Tests Add(string).
         /// </summary>
         [Test]
-        [TestCase(false, ExecutionResultStatus.Success, "Ressources/NoTarget.csproj")]
-        [TestCase(false, ExecutionResultStatus.Success, "Ressources/TargetNoExec.csproj")]
-        [TestCase(false, ExecutionResultStatus.Success, "Ressources/TargetAnotherExec.csproj")]
-        [TestCase(true,  ExecutionResultStatus.Warning, "Ressources/AlreadyAdded.csproj")]
-        public void Add(bool alreadyExist, ExecutionResultStatus executionResultStatus, string sourceFile)
+        [TestCase(false, ExecutionResultStatus.Success, "NoTarget.csproj")]
+        [TestCase(false, ExecutionResultStatus.Success, "TargetNoExec.csproj")]
+        [TestCase(false, ExecutionResultStatus.Success, "TargetAnotherExec.csproj")]
+        [TestCase(true,  ExecutionResultStatus.Warning, "AlreadyAdded.csproj")]
+        public void Add(bool alreadyExist, ExecutionResultStatus executionResultStatus, string fileName)
         {
+            string sourceFile = Path.Combine("Ressources", "Csproj", fileName);
             string destinationFile = sourceFile.Replace(".csproj", "Copy.csproj");
             File.Copy(sourceFile, destinationFile, true);
             Assert.AreEqual(alreadyExist, IsFadmAdded(destinationFile));

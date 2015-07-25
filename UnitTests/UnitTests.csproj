@@ -81,28 +81,28 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Ressources\AlreadyAdded.csproj">
+    <Content Include="Ressources\Csproj\AlreadyAdded.csproj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Ressources\TargetAnotherExec.csproj">
+    <Content Include="Ressources\Csproj\TargetAnotherExec.csproj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Ressources\TargetNoExec.csproj">
+    <Content Include="Ressources\Csproj\TargetNoExec.csproj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Ressources\NoTarget.csproj">
+    <Content Include="Ressources\Csproj\NoTarget.csproj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Ressources\UTSample.exe">
+    <Content Include="Ressources\Assembly\UTSample.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Ressources\UTSample.dll">
+    <Content Include="Ressources\Assembly\UTSample.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Ressources\UTSampleWithPdb.dll">
+    <Content Include="Ressources\Assembly\UTSampleWithPdb.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Ressources\UTSampleWithPdb.pdb">
+    <Content Include="Ressources\Assembly\UTSampleWithPdb.pdb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

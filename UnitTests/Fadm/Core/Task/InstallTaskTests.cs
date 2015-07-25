@@ -81,9 +81,9 @@ namespace Fadm.CommandLine
         /// <param name="expectedSubStatus">The expected sub result stats.</param>
         /// <param name="expectedSubMessage">The expected sub result message.</param>
         [Test]
-        [TestCase("Ressources/UTSample", "UTSampleDependency", "1.0.0.0", "dll", ExecutionResultStatus.Warning, "PDB not found at")]
-        [TestCase("Ressources/UTSample", "Test", "1.0.0.0", "exe", ExecutionResultStatus.Warning, "PDB not found at")]
-        [TestCase("Ressources/UTSampleWithPdb", "WithPdb", "1.0.0.0", "dll", ExecutionResultStatus.Success, "PDB installed to")]
+        [TestCase("UTSample", "UTSampleDependency", "1.0.0.0", "dll", ExecutionResultStatus.Warning, "PDB not found at")]
+        [TestCase("UTSample", "Test", "1.0.0.0", "exe", ExecutionResultStatus.Warning, "PDB not found at")]
+        [TestCase("UTSampleWithPdb", "WithPdb", "1.0.0.0", "dll", ExecutionResultStatus.Success, "PDB installed to")]
         public void InstallSuccess(
             string ressourceFile,
             string dependencyName,
@@ -95,7 +95,7 @@ namespace Fadm.CommandLine
             // Compute dependency path
             string dependencyDirectoryPath = FileSystem.ComputeDependencyDirectoryPath(dependencyName, dependencyVersion);
             string dependencyFilePath = FileSystem.ComputeDependencyFilePath(dependencyName, dependencyVersion, dependencyExtension);
-            string ressourceFilePath = string.Format(CultureInfo.InvariantCulture, "{0}.{1}", ressourceFile, dependencyExtension);
+            string ressourceFilePath = string.Format(CultureInfo.InvariantCulture, "{0}.{1}", Path.Combine("Ressources", "Assembly", ressourceFile), dependencyExtension);
 
             // Remove the dependency path if it exists
             if (Directory.Exists(dependencyDirectoryPath))
