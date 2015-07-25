@@ -18,6 +18,7 @@
  */
 
 using System;
+using System.Globalization;
 using System.IO;
 using Fadm.Core;
 using Fadm.Core.Task;
@@ -36,17 +37,6 @@ namespace Fadm.CommandLine
         /// The install task.
         /// </summary>
         public IInstallTask InstallTask { get; set; }
-
-        /// <summary>
-        /// The installed depdendnecy directory path.
-        /// </summary>
-        public string DependencyDirectoryPath { get; set; }
-
-        /// <summary>
-        /// The installed depdendnecy file path.
-        /// </summary>
-        public string DependencyFilePath { get; set; }
-
         /// <summary>
         /// Initializes <see cref="ExecutionResultFormatterTests"/>.
         /// </summary>
@@ -55,14 +45,6 @@ namespace Fadm.CommandLine
         {
             // Initialize
             InstallTask = new InstallTask();
-            DependencyDirectoryPath = FileSystem.ComputeDependencyDirectoryPath("UTSampleDependency", "1.0.0.0");
-            DependencyFilePath = FileSystem.ComputeDependencyFilePath("UTSampleDependency", "1.0.0.0", "dll");
-
-            // Remove the dependency path if it exists
-            if (Directory.Exists(DependencyDirectoryPath))
-            {
-                Directory.Delete(DependencyDirectoryPath, true);
-            }
         }
 
         /// <summary>
@@ -76,38 +58,49 @@ namespace Fadm.CommandLine
         }
 
         /// <summary>
-        /// Tests Install(string) with null value.
+        /// Tests Install(string) with failure.
         /// </summary>
+        /// <param name="fileName">The file name which must failed installing.</param>
         [Test]
-        public void InstallDoesntExist()
+        [TestCase("Doesn't exist.dll")]
+        [TestCase("Moq.xml")]
+        public void InstallError(string fileName)
         {
-            ExecutionResult result = InstallTask.Install("Doesn't exist.dll");
+            ExecutionResult result = InstallTask.Install(fileName);
             Assert.AreEqual(ExecutionResultStatus.Error, result.Status);
         }
 
         /// <summary>
-        /// Tests Install(string) with xml value.
+        /// Tests Install(string) with success.
         /// </summary>
         [Test]
-        public void InstallNotDll()
+        [TestCase("Ressources/UTSample", "UTSampleDependency", "1.0.0.0", "dll")]
+        [TestCase("Ressources/UTSample", "Test", "1.0.0.0", "exe")]
+        public void InstallSuccess(string ressourceFile, string dependencyName, string dependencyVersion, string dependencyExtension)
         {
-            ExecutionResult result = InstallTask.Install("Moq.xml");
-            Assert.AreEqual(ExecutionResultStatus.Error, result.Status);
-        }
+            // Compute dependency path
+            string dependencyDirectoryPath = FileSystem.ComputeDependencyDirectoryPath(dependencyName, dependencyVersion);
+            string dependencyFilePath = FileSystem.ComputeDependencyFilePath(dependencyName, dependencyVersion, dependencyExtension);
+            string ressourceFilePath = string.Format(CultureInfo.InvariantCulture, "{0}.{1}", ressourceFile, dependencyExtension);
 
-        /// <summary>
-        /// Tests Install(string) with correct value.
-        /// </summary>
-        [Test]
-        public void InstallSuccess()
-        {
-            Assert.AreEqual(true, File.Exists("Ressources/UTSample.dll"));
-            Assert.AreEqual(false, Directory.Exists(DependencyDirectoryPath));
-            Assert.AreEqual(false, File.Exists(DependencyFilePath));
-            ExecutionResult result = InstallTask.Install("Ressources/UTSample.dll");
+            // Remove the dependency path if it exists
+            if (Directory.Exists(dependencyDirectoryPath))
+            {
+                Directory.Delete(dependencyDirectoryPath, true);
+            }
+
+            // Assert initial status
+            Assert.AreEqual(true, File.Exists(ressourceFilePath));
+            Assert.AreEqual(false, Directory.Exists(dependencyDirectoryPath));
+            Assert.AreEqual(false, File.Exists(dependencyFilePath));
+
+            // Trigger install
+            ExecutionResult result = InstallTask.Install(ressourceFilePath);
+
+            // Assert output
             Assert.AreEqual(ExecutionResultStatus.Success, result.Status);
-            Assert.AreEqual(true, Directory.Exists(DependencyDirectoryPath));
-            Assert.AreEqual(true, File.Exists(DependencyFilePath));
+            Assert.AreEqual(true, Directory.Exists(dependencyDirectoryPath));
+            Assert.AreEqual(true, File.Exists(dependencyFilePath));
         }
     }
 }

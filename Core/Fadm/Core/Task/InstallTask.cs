@@ -18,6 +18,7 @@
  */
 
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Fadm.Utilities;
 
@@ -28,6 +29,11 @@ namespace Fadm.Core.Task
     /// </summary>
     public class InstallTask : IInstallTask
     {
+        /// <summary>
+        /// Defines the allowed extensions.
+        /// </summary>
+        private readonly string[] allowedExtensions = { ".dll", ".exe" };
+
         /// <summary>
         /// Installs a file to the local repository.
         /// </summary>
@@ -49,9 +55,9 @@ namespace Fadm.Core.Task
 
             // Only dll file supported for now
             string extension = Path.GetExtension(path);
-            if (".dll" != extension)
+            if (!allowedExtensions.Contains(extension))
             {
-                return new ExecutionResult(ExecutionResultStatus.Error, string.Format("The file '{0}' is not a dll", path));
+                return new ExecutionResult(ExecutionResultStatus.Error, string.Format("The file '{0}' must have following extensions [{1}]", path, string.Join(",", allowedExtensions)));
             }
 
             // Ensure that the repository exists
@@ -67,7 +73,7 @@ namespace Fadm.Core.Task
             FileSystem.EnsureExistingDirectory(dependencyPath);
 
             // Copy the dll to the local repository
-            string fileTarget = FileSystem.ComputeDependencyFilePath(name, version, "dll");
+            string fileTarget = FileSystem.ComputeDependencyFilePath(name, version, extension.Substring(1));
             File.Copy(path, Path.Combine(dependencyPath, fileTarget), true);
 
             // Return execution result
