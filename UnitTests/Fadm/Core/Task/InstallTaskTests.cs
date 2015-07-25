@@ -74,11 +74,23 @@ namespace Fadm.CommandLine
         /// <summary>
         /// Tests Install(string) with success.
         /// </summary>
+        /// <param name="ressourceFile">The ressource file to install.</param>
+        /// <param name="dependencyName">The dependency name.</param>
+        /// <param name="dependencyVersion">The dependency version.</param>
+        /// <param name="dependencyExtension">The dependency extension.</param>
+        /// <param name="expectedSubStatus">The expected sub result stats.</param>
+        /// <param name="expectedSubMessage">The expected sub result message.</param>
         [Test]
-        [TestCase("Ressources/UTSample", "UTSampleDependency", "1.0.0.0", "dll")]
-        [TestCase("Ressources/UTSample", "Test", "1.0.0.0", "exe")]
-        [TestCase("Ressources/UTSampleWithPdb", "WithPdb", "1.0.0.0", "dll")]
-        public void InstallSuccess(string ressourceFile, string dependencyName, string dependencyVersion, string dependencyExtension)
+        [TestCase("Ressources/UTSample", "UTSampleDependency", "1.0.0.0", "dll", ExecutionResultStatus.Warning, "PDB not found at")]
+        [TestCase("Ressources/UTSample", "Test", "1.0.0.0", "exe", ExecutionResultStatus.Warning, "PDB not found at")]
+        [TestCase("Ressources/UTSampleWithPdb", "WithPdb", "1.0.0.0", "dll", ExecutionResultStatus.Success, "PDB installed to")]
+        public void InstallSuccess(
+            string ressourceFile,
+            string dependencyName,
+            string dependencyVersion,
+            string dependencyExtension,
+            ExecutionResultStatus expectedSubStatus,
+            string expectedSubMessage)
         {
             // Compute dependency path
             string dependencyDirectoryPath = FileSystem.ComputeDependencyDirectoryPath(dependencyName, dependencyVersion);
@@ -101,6 +113,9 @@ namespace Fadm.CommandLine
 
             // Assert output
             Assert.AreEqual(ExecutionResultStatus.Success, result.Status);
+            Assert.AreEqual(1, result.SubExecutionResults.Length);
+            Assert.AreEqual(expectedSubStatus, result.SubExecutionResults[0].Status);
+            Assert.AreEqual(true, result.SubExecutionResults[0].Message.StartsWith(expectedSubMessage));
             Assert.AreEqual(true, Directory.Exists(dependencyDirectoryPath));
             Assert.AreEqual(true, File.Exists(dependencyFilePath));
         }

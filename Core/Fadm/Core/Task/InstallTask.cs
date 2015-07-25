@@ -83,13 +83,20 @@ namespace Fadm.Core.Task
 
             // Copy the pdb if available
             string pdbPath = Path.ChangeExtension(path, PDB_EXTENSION);
+            string pdbFileTarget = Path.ChangeExtension(fileTarget, PDB_EXTENSION);
+            ExecutionResult pdbExecutionResult;
             if (File.Exists(pdbPath))
             {
-                File.Copy(pdbPath, Path.Combine(dependencyPath, Path.ChangeExtension(fileTarget, PDB_EXTENSION)), true);
+                File.Copy(pdbPath, Path.Combine(dependencyPath, pdbFileTarget), true);
+                pdbExecutionResult = new ExecutionResult(ExecutionResultStatus.Success, string.Format("PDB installed to '{0}'", pdbFileTarget));
+            }
+            else
+            {
+                pdbExecutionResult = new ExecutionResult(ExecutionResultStatus.Warning, string.Format("PDB not found at '{0}'", pdbPath));
             }
 
             // Return execution result
-            return new ExecutionResult(ExecutionResultStatus.Success, string.Format("File installed to '{0}'", fileTarget));
+            return new ExecutionResult(ExecutionResultStatus.Success, string.Format("File installed to '{0}'", fileTarget), new ExecutionResult[] { pdbExecutionResult });
         }
     }
 }
