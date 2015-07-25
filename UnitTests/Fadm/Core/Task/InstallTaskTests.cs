@@ -37,6 +37,7 @@ namespace Fadm.CommandLine
         /// The install task.
         /// </summary>
         public IInstallTask InstallTask { get; set; }
+
         /// <summary>
         /// Initializes <see cref="ExecutionResultFormatterTests"/>.
         /// </summary>
