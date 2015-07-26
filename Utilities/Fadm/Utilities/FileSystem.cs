@@ -65,6 +65,24 @@ namespace Fadm.Utilities
         }
 
         /// <summary>
+        /// Computes the dependency file name from the dependency name, version and extension.
+        /// </summary>
+        /// <param name="name">The name of the dependency.</param>
+        /// <param name="version">The version of the dependency.</param>
+        /// <param name="extension">The extension.</param>
+        /// <returns>The computed file name.</returns>
+        public static string ComputeFileName(string name, string version, string extension)
+        {
+            // Input validation
+            Validate.IsNotNullOrWhitespace(name, "name must not be null.");
+            Validate.IsNotNullOrWhitespace(version, "version must not be null.");
+            Validate.IsNotNullOrWhitespace(extension, "extension must not be null.");
+
+            // Return the computed value
+            return string.Format("{0}-{1}.{2}", name, version, extension);
+        }
+
+        /// <summary>
         /// Computes the dependency file path based on name and version.
         /// </summary>
         /// <param name="name">The name of the dependency.</param>
@@ -78,7 +96,7 @@ namespace Fadm.Utilities
             Validate.IsNotNullOrWhitespace(version, "version must not be null.");
             Validate.IsNotNullOrWhitespace(extension, "extension must not be null.");
 
-            string fileTarget = string.Format("{0}-{1}.{2}", name, version, extension);
+            string fileTarget = ComputeFileName(name, version, extension);
 
             // Return the computed value
             return Path.Combine(ComputeDependencyDirectoryPath(name, version), fileTarget);

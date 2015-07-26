@@ -56,6 +56,7 @@
     <Compile Include="Fadm\CommandLine\FadmCommandLineProgramTests.cs" />
     <Compile Include="Fadm\CommandLine\ExecutionResultFormatterTests.cs" />
     <Compile Include="Fadm\Core\Task\AddTaskTests.cs" />
+    <Compile Include="Fadm\Core\Task\CopyTaskTests.cs" />
     <Compile Include="Fadm\Core\Task\InstallTaskTests.cs" />
     <Compile Include="Fadm\Core\Loader\DescriptorLoaderTests.cs" />
     <Compile Include="Fadm\Utilities\FileSystemTests.cs" />
@@ -87,6 +88,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Ressources\Csproj\AlreadyAdded.csproj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Ressources\Copy\fadm.xml">
+      <SubType>Designer</SubType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Ressources\Csproj\TargetAnotherExec.csproj">

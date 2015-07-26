@@ -66,5 +66,33 @@ namespace Fadm.Utilities
             Assert.AreEqual(true, Directory.Exists(folderName));
             Directory.Delete(folderName);
         }
+
+        /// <summary>
+        /// Tests ComputeFileName(string, string, string).
+        /// </summary>
+        [Test]
+        public void ComputeFileName()
+        {
+            Assert.AreEqual("name-version.extension", FileSystem.ComputeFileName("name", "version", "extension"));
+        }
+
+        /// <summary>
+        /// Tests ComputeFileName(string, string, string) with invalid input.
+        /// </summary>
+        /// <param name="name">The file name.</param>
+        /// <param name="version">The file version.</param>
+        /// <param name="extension">The file extension.</param>
+        [Test]
+        [ExpectedException(typeof(ArgumentException))]
+        [TestCase("a", "b", "")]
+        [TestCase("a", "b", null)]
+        [TestCase("a", "", "c")]
+        [TestCase("a", null, "c")]
+        [TestCase("", "b", "c")]
+        [TestCase(null, "b", "c")]
+        public void ComputeFileNameInvalid(string name, string version, string extension)
+        {
+            FileSystem.ComputeFileName(name, version, extension);
+        }
     }
 }
