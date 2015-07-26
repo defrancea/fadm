@@ -36,6 +36,9 @@ namespace Fadm.Core.Loader
         /// </summary>
         public DescriptorLoader DescriptorBuilder { get; private set; }
 
+        /// <summary>
+        /// Initializes <see cref="ProjectTests"/>.
+        /// </summary>
         [SetUp]
         public void Initialize()
         {
