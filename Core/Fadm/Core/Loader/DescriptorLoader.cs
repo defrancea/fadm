@@ -1,4 +1,23 @@
-﻿using System;
+﻿/*
+ * Copyright (c) 2015, Fadm. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ * MA 02110-1301  USA
+ */
+
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -59,6 +78,10 @@ namespace Fadm.Core.Loader
         /// <returns>The loaded descriptor.</returns>
         public Project Load(string fileName)
         {
+            // Input validation
+            Validate.IsNotNullOrWhitespace(fileName, "The filename must be set.");
+            Validate.IsTrue(File.Exists(fileName), string.Format(CultureInfo.InvariantCulture, "Descriptor {0} not found.", fileName));
+
             // Initialize ressources
             XmlSchema projectSchema = LoadProjectSchema();
             XmlReaderSettings settings = BuildSettings(projectSchema);
@@ -75,7 +98,7 @@ namespace Fadm.Core.Loader
 
                     // Initialize namespace manager
                     XmlNamespaceManager namespaceManager = new XmlNamespaceManager(xmlDocument.NameTable);
-                    namespaceManager.AddNamespace(NS_PREFIX, NS_PREFIX);
+                    namespaceManager.AddNamespace(NS_PREFIX, NS_NAME);
 
                     // Iterate over all dependencies
                     XmlNodeList dependencyNodes = xmlDocument.SelectNodes(DEPENDENCY_QUERY, namespaceManager);
@@ -221,7 +244,7 @@ namespace Fadm.Core.Loader
             settings.ValidationEventHandler += (sender, args) =>
             {
                 if (args.Severity == XmlSeverityType.Error)
-                    throw new InvalidOperationException(args.Message);
+                    throw new XmlException(args.Message);
             };
 
             // Return settings

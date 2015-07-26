@@ -57,6 +57,7 @@
     <Compile Include="Fadm\CommandLine\ExecutionResultFormatterTests.cs" />
     <Compile Include="Fadm\Core\Task\AddTaskTests.cs" />
     <Compile Include="Fadm\Core\Task\InstallTaskTests.cs" />
+    <Compile Include="Fadm\Core\Loader\DescriptorLoaderTests.cs" />
     <Compile Include="Fadm\Utilities\FileSystemTests.cs" />
     <Compile Include="Fadm\Utilities\ValidateTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -74,6 +75,10 @@
     <ProjectReference Include="..\Core\Core.csproj">
       <Project>{2a36ce60-9215-49c9-878e-f1cedd8d81cc}</Project>
       <Name>Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Model\Model.csproj">
+      <Project>{688e0507-70da-4268-b8af-94cb2f1f5cb2}</Project>
+      <Name>Model</Name>
     </ProjectReference>
     <ProjectReference Include="..\Utilities\Utilities.csproj">
       <Project>{22afbcc8-ca90-46f2-b35a-424baccf4ab0}</Project>
@@ -104,6 +109,22 @@
     </Content>
     <Content Include="Ressources\Assembly\UTSampleWithPdb.pdb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Ressources\Project\Empty.xml">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Ressources\Project\NoXml.xml">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Ressources\Project\InvalidProject.xml">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Ressources\Project\SimpleProject.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </Content>
   </ItemGroup>
   <ItemGroup />
