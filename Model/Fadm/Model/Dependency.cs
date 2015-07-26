@@ -63,6 +63,7 @@ namespace Fadm.Model
             // Initializes
             this.Name = name;
             this.Version = version;
+            this.Culture = CultureInfo.InvariantCulture;
         }
 
         /// <summary>

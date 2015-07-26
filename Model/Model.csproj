@@ -41,6 +41,11 @@
   <ItemGroup>
     <Compile Include="Fadm\Model\Dependency.cs" />
     <Compile Include="Fadm\Model\Project.cs" />
+    <Compile Include="Fadm\Model\Schema\Ressources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Ressources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -50,9 +55,15 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Fadm\Model\Project.xsd">
+    <None Include="Fadm\Model\Schema\ProjectSchema.xsd">
       <SubType>Designer</SubType>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Fadm\Model\Schema\Ressources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Ressources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
