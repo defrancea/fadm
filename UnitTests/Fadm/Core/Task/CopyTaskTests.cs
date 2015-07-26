@@ -113,7 +113,7 @@ namespace Fadm.CommandLine
 
             // Trigger install
             InstallTask.Install(string.Format(CultureInfo.InvariantCulture, "{0}.{1}", Path.Combine("Ressources", "Assembly", "UTSampleWithPdb"), "dll"));
-            InstallTask.Install(string.Format(CultureInfo.InvariantCulture, "{0}.{1}", Path.Combine("Ressources", "Assembly", "UTSampleDependency"), "dll"));
+            InstallTask.Install(string.Format(CultureInfo.InvariantCulture, "{0}.{1}", Path.Combine("Ressources", "Assembly", "UTSample"), "dll"));
 
             // Trigger copy
             ExecutionResult resultCopy = CopyTask.Copy(descriptorLocation);
