@@ -50,11 +50,6 @@ namespace Fadm.Model
         public ProcessorArchitecture Architecture { get; private set; }
 
         /// <summary>
-        /// The key pair.
-        /// </summary>
-        public StrongNameKeyPair KeyPair { get; private set; }
-
-        /// <summary>
         /// Initializes a new instance of <see cref="Dependency"/>.
         /// </summary>
         /// <param name="name">The assembly name.</param>
@@ -86,24 +81,6 @@ namespace Fadm.Model
             // Initializes
             this.Culture = culture;
             this.Architecture = architecture;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of <see cref="Dependency"/>.
-        /// </summary>
-        /// <param name="name">The assembly name.</param>
-        /// <param name="verson">The asembly version.</param>
-        /// <param name="culture">The assembly culture.</param>
-        /// <param name="architecture">The compatible architecture of the assembly.</param>
-        /// <param name="keyPair">The key pair used for signing the assembly.</param>
-        public Dependency(string name, Version version, CultureInfo culture, ProcessorArchitecture architecture, StrongNameKeyPair keyPair)
-            : this(name, version, culture, architecture)
-        {
-            // Input validation
-            Validate.IsNotNull(keyPair, "The assembly keyPair must me specified.");
-
-            // Initializes
-            this.KeyPair = keyPair;
         }
     }
 }
