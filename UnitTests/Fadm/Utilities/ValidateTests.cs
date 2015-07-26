@@ -50,38 +50,25 @@ namespace Fadm.Utilities
         /// <summary>
         /// Tests IsNotNullOrWhitespace(object, string) with null value.
         /// </summary>
+        /// <param name="value">The value to test.</param>
         [Test]
+        [TestCase(null)]
+        [TestCase("")]
+        [TestCase("    ")]
+        [TestCase("\t")]
+        [TestCase("\n")]
+        [TestCase("\r")]
         [ExpectedException(typeof(ArgumentException), ExpectedMessage = "Foo")]
-        public void IsNotNullOrWhiteSpaceNull()
+        public void IsNotNullOrWhiteSpace(string value)
         {
-            Validate.IsNotNullOrWhitespace(null, "Foo");
-        }
-
-        /// <summary>
-        /// Tests IsNotNullOrWhitespace(object, string) with empty value.
-        /// </summary>
-        [Test]
-        [ExpectedException(typeof(ArgumentException), ExpectedMessage = "Foo")]
-        public void IsNotNullOrWhiteSpaceEmpty()
-        {
-            Validate.IsNotNullOrWhitespace(string.Empty, "Foo");
-        }
-
-        /// <summary>
-        /// Tests IsNotNullOrWhitespace(object, string) with whitespace value.
-        /// </summary>
-        [Test]
-        [ExpectedException(typeof(ArgumentException), ExpectedMessage = "Foo")]
-        public void IsNotNullOrWhiteSpaceWhitespace()
-        {
-            Validate.IsNotNullOrWhitespace("    ", "Foo");
+            Validate.IsNotNullOrWhitespace(value, "Foo");
         }
 
         /// <summary>
         /// Tests IsNotNullOrWhitespace(object, string) with data.
         /// </summary>
         [Test]
-        public void IsNotNullOrWhiteSpaceWithData()
+        public void IsNotNullOrWhiteSpace()
         {
             Validate.IsNotNullOrWhitespace("some content", "Foo");
         }
