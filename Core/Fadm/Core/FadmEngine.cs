@@ -33,6 +33,11 @@ namespace Fadm.Core
         private IAddTask AddTask;
 
         /// <summary>
+        /// The copy task in charge of retrieving the dependencies from the local storage.
+        /// </summary>
+        private ICopyTask CopyTask;
+
+        /// <summary>
         /// The install task in charge of installing ressources to the local storage.
         /// </summary>
         private IInstallTask InstallTask;
@@ -41,7 +46,7 @@ namespace Fadm.Core
         /// Initializes a new instance of <see cref="FadmEngine"/>.
         /// </summary>
         public FadmEngine()
-            : this(new AddTask(), new InstallTask())
+            : this(new AddTask(), new CopyTask(), new InstallTask())
         {
         }
 
@@ -49,15 +54,18 @@ namespace Fadm.Core
         /// Initializes a new instance of <see cref="FadmEngine"/>.
         /// </summary>
         /// <param name="addTask">The add task.</param>
+        /// <param name="copyTask">The copy task.</param>
         /// <param name="installTask">The install task.</param>
-        public FadmEngine(IAddTask addTask, IInstallTask installTask)
+        public FadmEngine(IAddTask addTask, ICopyTask copyTask, IInstallTask installTask)
         {
             // Input validation
             Validate.IsNotNull(addTask, "addTask must not be null.");
+            Validate.IsNotNull(copyTask, "copyTask must not be null.");
             Validate.IsNotNull(installTask, "installTask must not be null.");
 
             // Initialize
             this.AddTask = addTask;
+            this.CopyTask = copyTask;
             this.InstallTask = installTask;
         }
 
@@ -73,6 +81,20 @@ namespace Fadm.Core
 
             // Invoke the task
             return AddTask.Add(path);
+        }
+
+        /// <summary>
+        /// Delegates to the copy task.
+        /// </summary>
+        /// <param name="path">The file to process.</param>
+        /// <returns>The execution result.</returns>
+        public ExecutionResult Copy(string path)
+        {
+            // Input validation
+            Validate.IsNotNullOrWhitespace(path, "path must not be null.");
+
+            // Invoke the task
+            return CopyTask.Copy(path);
         }
 
         /// <summary>

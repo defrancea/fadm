@@ -45,7 +45,9 @@
     <Compile Include="Fadm\Core\FadmEngine.cs" />
     <Compile Include="Fadm\Core\IFadmEngine.cs" />
     <Compile Include="Fadm\Core\Task\AddTask.cs" />
+    <Compile Include="Fadm\Core\Task\CopyTask.cs" />
     <Compile Include="Fadm\Core\Task\IAddTask.cs" />
+    <Compile Include="Fadm\Core\Task\ICopyTask.cs" />
     <Compile Include="Fadm\Core\Task\IInstallTask.cs" />
     <Compile Include="Fadm\Core\Task\InstallTask.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

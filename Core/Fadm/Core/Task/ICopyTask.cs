@@ -20,15 +20,15 @@
 namespace Fadm.Core.Task
 {
     /// <summary>
-    /// The install task in charge of installing ressources to the local storage.
+    /// The copy task in charge of retrieving the dependencies from the local storage.
     /// </summary>
-    public interface IInstallTask
+    public interface ICopyTask
     {
         /// <summary>
-        /// Installs a file to the local repository.
+        /// Copy the dependencies from the local repository.
         /// </summary>
-        /// <param name="path">The file path to install.</param>
+        /// <param name="path">The file path to copy the dependencies for.</param>
         /// <returns>The execution result.</returns>
-        ExecutionResult Install(string path);
+        ExecutionResult Copy(string path);
     }
 }
