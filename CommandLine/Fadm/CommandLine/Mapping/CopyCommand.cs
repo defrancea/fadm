@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (c) 2015, Fadm. All rights reserved.
+ * Copyright (c) 2014, Fadm. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,14 +17,19 @@
  * MA 02110-1301  USA
  */
 
-using Fadm.Core.Task;
+using CommandLine;
 
-namespace Fadm.Core
+namespace Fadm.CommandLine.Mapping
 {
     /// <summary>
-    /// Fadm engine handling external operations.
+    /// Represents an user input executing copy command.
     /// </summary>
-    public interface IFadmEngine : IAddTask, ICopyTask, IInstallTask
+    public class CopyCommand
     {
+        /// <summary>
+        /// The file path where the user is requisting to copy the dependency to.
+        /// </summary>
+        [ValueOption(0)]
+        public string FilePath { get; set; }
     }
 }

@@ -87,6 +87,10 @@ namespace Fadm.CommandLine
                         Add((AddCommand)executedCommand);
                         break;
 
+                    case FadmCommand.COPY:
+                        Copy((CopyCommand)executedCommand);
+                        break;
+
                     case FadmCommand.INSTALL:
                         Install((InstallCommand)executedCommand);
                         break;
@@ -101,6 +105,16 @@ namespace Fadm.CommandLine
         public void Add(AddCommand add)
         {
             ExecutionResult result = this.Engine.Add(add.FilePath);
+            Console.WriteLine(Formatter.Format(result));
+        }
+
+        /// <summary>
+        /// Restores a dependency to a project.
+        /// </summary>
+        /// <param name="add">The copy command containing the user input.</param>
+        public void Copy(CopyCommand copy)
+        {
+            ExecutionResult result = this.Engine.Copy(copy.FilePath);
             Console.WriteLine(Formatter.Format(result));
         }
 

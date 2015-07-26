@@ -67,27 +67,6 @@ namespace Fadm.CommandLine
         }
 
         /// <summary>
-        /// Tests Execute(string[]) for install command.
-        /// </summary>
-        [Test]
-        public void ExecuteInstall()
-        {
-            ExecutionResult result = null;
-            Engine
-                .Setup(instance => instance.Install(It.IsAny<string>()))
-                .Returns(new ExecutionResult(ExecutionResultStatus.Success, "Install executed"));
-            Formatter
-                .Setup(instance => instance.Format(It.IsAny<ExecutionResult>()))
-                .Callback<ExecutionResult>(executionResult => result = executionResult);
-            Program.Execute(new string[] { "install", "foo.dll" });
-            Engine.Verify(instance => instance.Install("foo.dll"));
-
-            Assert.IsNotNull(result);
-            Assert.AreEqual(ExecutionResultStatus.Success, result.Status);
-            Assert.AreEqual("Install executed", result.Message);
-        }
-
-        /// <summary>
         /// Tests Execute(string[]) for add command.
         /// </summary>
         [Test]
@@ -106,6 +85,48 @@ namespace Fadm.CommandLine
             Assert.IsNotNull(result);
             Assert.AreEqual(ExecutionResultStatus.Error, result.Status);
             Assert.AreEqual("Add executed", result.Message);
+        }
+
+        /// <summary>
+        /// Tests Execute(string[]) for copy command.
+        /// </summary>
+        [Test]
+        public void ExecuteCopy()
+        {
+            ExecutionResult result = null;
+            Engine
+                .Setup(instance => instance.Copy(It.IsAny<string>()))
+                .Returns(new ExecutionResult(ExecutionResultStatus.Error, "Copy executed"));
+            Formatter
+                .Setup(instance => instance.Format(It.IsAny<ExecutionResult>()))
+                .Callback<ExecutionResult>(executionResult => result = executionResult);
+            Program.Execute(new string[] { "copy", "foo.csproj" });
+            Engine.Verify(instance => instance.Copy("foo.csproj"));
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(ExecutionResultStatus.Error, result.Status);
+            Assert.AreEqual("Copy executed", result.Message);
+        }
+
+        /// <summary>
+        /// Tests Execute(string[]) for install command.
+        /// </summary>
+        [Test]
+        public void ExecuteInstall()
+        {
+            ExecutionResult result = null;
+            Engine
+                .Setup(instance => instance.Install(It.IsAny<string>()))
+                .Returns(new ExecutionResult(ExecutionResultStatus.Success, "Install executed"));
+            Formatter
+                .Setup(instance => instance.Format(It.IsAny<ExecutionResult>()))
+                .Callback<ExecutionResult>(executionResult => result = executionResult);
+            Program.Execute(new string[] { "install", "foo.dll" });
+            Engine.Verify(instance => instance.Install("foo.dll"));
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(ExecutionResultStatus.Success, result.Status);
+            Assert.AreEqual("Install executed", result.Message);
         }
     }
 }

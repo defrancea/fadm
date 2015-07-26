@@ -33,6 +33,11 @@ namespace Fadm.CommandLine.Mapping
         public const string ADD = "add";
 
         /// <summary>
+        /// Defines "copy" sub command name.
+        /// </summary>
+        public const string COPY = "copy";
+
+        /// <summary>
         /// Defines "install" sub command name.
         /// </summary>
         public const string INSTALL = "install";
@@ -43,6 +48,13 @@ namespace Fadm.CommandLine.Mapping
         /// <returns></returns>
         [VerbOption(ADD, HelpText = "Add a dependency to a project")]
         public AddCommand Add { get; set; }
+
+        /// <summary>
+        /// Defines the "add" sub command.
+        /// </summary>
+        /// <returns></returns>
+        [VerbOption(COPY, HelpText = "Copy a dependency to a project")]
+        public CopyCommand Copy { get; set; }
 
         /// <summary>
         /// Defines the "install" sub command.

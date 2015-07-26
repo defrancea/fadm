@@ -61,6 +61,7 @@
   <ItemGroup>
     <Compile Include="Fadm\CommandLine\ExecutionResultFormatter.cs" />
     <Compile Include="Fadm\CommandLine\IExecutionResultFormatter.cs" />
+    <Compile Include="Fadm\CommandLine\Mapping\CopyCommand.cs" />
     <Compile Include="Fadm\CommandLine\Mapping\FadmCommand.cs" />
     <Compile Include="Fadm\CommandLine\Mapping\AddCommand.cs" />
     <Compile Include="Fadm\CommandLine\Mapping\InstallCommand.cs" />
