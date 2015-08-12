@@ -54,32 +54,18 @@ namespace Fadm.Model
         /// </summary>
         /// <param name="name">The assembly name.</param>
         /// <param name="verson">The asembly version.</param>
-        public Dependency(string name, Version version)
+        /// <param name="culture">The assembly culture.</param>
+        /// <param name="architecture">The compatible architecture of the assembly.</param>
+        public Dependency(string name, Version version, CultureInfo culture, ProcessorArchitecture architecture)
         {
             // Input validation
             Validate.IsNotNullOrWhitespace(name, "The assembly name must me specified.");
             Validate.IsNotNull(version, "The version name must me specified.");
+            Validate.IsNotNull(culture, "The assembly culture must me specified.");
 
             // Initializes
             this.Name = name;
             this.Version = version;
-            this.Culture = CultureInfo.InvariantCulture;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of <see cref="Dependency"/>.
-        /// </summary>
-        /// <param name="name">The assembly name.</param>
-        /// <param name="verson">The asembly version.</param>
-        /// <param name="culture">The assembly culture.</param>
-        /// <param name="architecture">The compatible architecture of the assembly.</param>
-        public Dependency(string name, Version version, CultureInfo culture, ProcessorArchitecture architecture)
-            : this(name, version)
-        {
-            // Input validation
-            Validate.IsNotNull(culture, "The assembly culture must me specified.");
-
-            // Initializes
             this.Culture = culture;
             this.Architecture = architecture;
         }

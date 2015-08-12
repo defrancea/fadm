@@ -18,12 +18,12 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Xml;
+using System.Xml.Linq;
 using System.Xml.Schema;
 using Fadm.Model;
 using Fadm.Utilities;
@@ -36,41 +36,6 @@ namespace Fadm.Core.Loader
     /// </summary>
     public class DescriptorLoader
     {
-        /// <summary>
-        /// The namespace prefix.
-        /// </summary>
-        private const string NS_PREFIX = "ns";
-
-        /// <summary>
-        /// The namespace.
-        /// </summary>
-        private const string NS_NAME = "urn:project-schema";
-
-        /// <summary>
-        /// The dependency xpath query.
-        /// </summary>
-        private const string DEPENDENCY_QUERY = "/ns:Project/ns:Dependencies/ns:Dependency";
-
-        /// <summary>
-        /// The name node.
-        /// </summary>
-        private const string NODE_NAME = "ns:Name";
-
-        /// <summary>
-        /// The version node.
-        /// </summary>
-        private const string NODE_VERSION = "ns:Version";
-
-        /// <summary>
-        /// The culture node.
-        /// </summary>
-        private const string NODE_CULTURE = "ns:Culture";
-
-        /// <summary>
-        /// The architecture node.
-        /// </summary>
-        private const string NODE_ARCHITECTURE = "ns:Architecture";
-
         /// <summary>
         /// Parses a file and create a new insteance of <see cref="Project"/>.
         /// </summary>
@@ -87,7 +52,6 @@ namespace Fadm.Core.Loader
             XmlReaderSettings settings = BuildSettings(projectSchema);
 
             // Load the document
-            List<Dependency> dependencyList = new List<Dependency>();
             using (FileStream stream = new FileStream(fileName, FileMode.Open, FileAccess.Read))
             {
                 using (XmlReader xml = XmlReader.Create(stream, settings))
@@ -96,92 +60,37 @@ namespace Fadm.Core.Loader
                     XmlDocument xmlDocument = new XmlDocument();
                     xmlDocument.Load(xml);
 
-                    // Initialize namespace manager
-                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(xmlDocument.NameTable);
-                    namespaceManager.AddNamespace(NS_PREFIX, NS_NAME);
-
-                    // Iterate over all dependencies
-                    XmlNodeList dependencyNodes = xmlDocument.SelectNodes(DEPENDENCY_QUERY, namespaceManager);
-                    foreach (XmlNode dependencyNode in dependencyNodes)
-                    {
-                        // Retrieve xml nodes
-                        XmlNode nameNode = dependencyNode.SelectSingleNode(NODE_NAME, namespaceManager);
-                        XmlNode versionNode = dependencyNode.SelectSingleNode(NODE_VERSION, namespaceManager);
-                        XmlNode cultureNode = dependencyNode.SelectSingleNode(NODE_CULTURE, namespaceManager);
-                        XmlNode architectureNode = dependencyNode.SelectSingleNode(NODE_ARCHITECTURE, namespaceManager);
-
-                        // Load values from xml node
-                        string name = LoadString(nameNode);
-                        Version version = LoadVesion(versionNode);
-
-                        // Add to known dependencies as it if only name and version are specified
-                        if (null == cultureNode && null == architectureNode)
-                        {
-                            dependencyList.Add(new Dependency(name, version));
-                        }
-
-                        // Otherwise build remaining data
-                        else
-                        {
-                            // Load extra information
-                            CultureInfo culture = LoadCulture(cultureNode);
-                            ProcessorArchitecture architecture = LoadArchitecture(architectureNode);
-
-                            // Add to known dependencies
-                            dependencyList.Add(new Dependency(name, version, culture, architecture));
-                        }
-                    }
+                    // Build and return the project
+                    return new Project((
+                        from d in XDocument.Parse(xmlDocument.OuterXml)
+                            .Descendants("{urn:project-schema}Project")
+                            .Descendants("{urn:project-schema}Dependencies")
+                            .Descendants("{urn:project-schema}Dependency")
+                        select new Dependency(
+                            d.Descendants("{urn:project-schema}Name").First().Value,
+                            Version.Parse(d.Descendants("{urn:project-schema}Version").First().Value),
+                            ParseCulture(d.Descendants("{urn:project-schema}Culture").Select(culture => culture.Value).FirstOrDefault()),
+                            ParseArchitecture(d.Descendants("{urn:project-schema}Architecture").Select(arch => arch.Value).FirstOrDefault())
+                            )
+                        ).ToArray());
                 }
             }
-
-            // Build the project instance
-            return new Project(dependencyList.ToArray());
         }
 
         /// <summary>
-        /// Loads a node value as <see cref="string"/>.
+        /// Parses a value to <see cref="CultureInfo"/>.
         /// </summary>
-        /// <param name="node">The node to load.</param>
-        /// <returns>The loaded string.</returns>
-        private string LoadString(XmlNode node)
-        {
-            // Input validation
-            Validate.IsNotNull(node, "The xml node must not be null.");
-            Validate.IsNotNullOrWhitespace(node.InnerText, "The node value must be set.");
-
-            // Return as string
-            return node.InnerText;
-        }
-
-        /// <summary>
-        /// Loads a node value as <see cref="Version"/>.
-        /// </summary>
-        /// <param name="node">The node to load.</param>
-        /// <returns>The loaded version.</returns>
-        private Version LoadVesion(XmlNode node)
-        {
-            // Input validation
-            Validate.IsNotNull(node, "The xml node must not be null.");
-            Validate.IsNotNullOrWhitespace(node.InnerText, "The node value must be set.");
-
-            // Parse and retyrn the value
-            return Version.Parse(node.InnerText);
-        }
-
-        /// <summary>
-        /// Loads a node value as <see cref="CultureInfo"/>.
-        /// </summary>
-        /// <param name="node">The node to load.</param>
-        /// <returns>The loaded culture.</returns>
-        private CultureInfo LoadCulture(XmlNode node)
+        /// <param name="value">The value to parse.</param>
+        /// <returns>The parsed culture.</returns>
+        private CultureInfo ParseCulture(string value)
         {
             // Look for the culture
-            if (null != node && !string.IsNullOrWhiteSpace(node.InnerText))
+            if (!string.IsNullOrWhiteSpace(value))
             {
                 // Lookup from all cultures
                 CultureInfo culture = CultureInfo
                     .GetCultures(CultureTypes.AllCultures)
-                    .FirstOrDefault(c => c.Name == node.InnerText);
+                    .FirstOrDefault(c => c.Name == value);
 
                 // Return the culture if it found something
                 if (null != culture)
@@ -195,18 +104,18 @@ namespace Fadm.Core.Loader
         }
 
         /// <summary>
-        /// Loads a node value as <see cref="ProcessorArchitecture"/>.
+        /// Parses a value value to <see cref="ProcessorArchitecture"/>.
         /// </summary>
-        /// <param name="node">The node to load.</param>
-        /// <returns>The loaded architecture.</returns>
-        private ProcessorArchitecture LoadArchitecture(XmlNode node)
+        /// <param name="value">The value to parse.</param>
+        /// <returns>The parsed architecture.</returns>
+        private ProcessorArchitecture ParseArchitecture(string value)
         {
             // Look for the architecture
-            if (null != node && !string.IsNullOrWhiteSpace(node.InnerText))
+            if (!string.IsNullOrWhiteSpace(value))
             {
                 // Parse the architecture
                 ProcessorArchitecture architecture;
-                if (Enum.TryParse(node.InnerText, out architecture))
+                if (Enum.TryParse(value, out architecture))
                 {
                     return architecture;
                 }
