@@ -54,26 +54,27 @@ namespace Fadm.Core.Loader
             // Load the document
             using (FileStream stream = new FileStream(fileName, FileMode.Open, FileAccess.Read))
             {
-                using (XmlReader xml = XmlReader.Create(stream, settings))
-                {
-                    // Load xml document
-                    XmlDocument xmlDocument = new XmlDocument();
-                    xmlDocument.Load(xml);
+                // Define schema from xsd
+                XmlSchemaSet schemas = new XmlSchemaSet();
+                schemas.Add("urn:project-schema", XmlReader.Create(new StringReader(Ressources.PROJECT_SCHEMA)));
 
-                    // Build and return the project
-                    return new Project((
-                        from d in XDocument.Parse(xmlDocument.OuterXml)
-                            .Descendants("{urn:project-schema}Project")
-                            .Descendants("{urn:project-schema}Dependencies")
-                            .Descendants("{urn:project-schema}Dependency")
-                        select new Dependency(
-                            d.Descendants("{urn:project-schema}Name").First().Value,
-                            Version.Parse(d.Descendants("{urn:project-schema}Version").First().Value),
-                            ParseCulture(d.Descendants("{urn:project-schema}Culture").Select(culture => culture.Value).FirstOrDefault()),
-                            ParseArchitecture(d.Descendants("{urn:project-schema}Architecture").Select(arch => arch.Value).FirstOrDefault())
-                            )
-                        ).ToArray());
-                }
+                // Load xml document and validate the content
+                XDocument document = XDocument.Load(stream);
+                document.Validate(schemas, (sender, evt) => { throw new XmlException(evt.Message, evt.Exception); });
+
+                // Build and return the project
+                return new Project((
+                    from d in document
+                        .Descendants("{urn:project-schema}Project")
+                        .Descendants("{urn:project-schema}Dependencies")
+                        .Descendants("{urn:project-schema}Dependency")
+                    select new Dependency(
+                        d.Descendants("{urn:project-schema}Name").First().Value,
+                        Version.Parse(d.Descendants("{urn:project-schema}Version").First().Value),
+                        ParseCulture(d.Descendants("{urn:project-schema}Culture").Select(culture => culture.Value).FirstOrDefault()),
+                        ParseArchitecture(d.Descendants("{urn:project-schema}Architecture").Select(arch => arch.Value).FirstOrDefault())
+                        )
+                    ).ToArray());
             }
         }
 
