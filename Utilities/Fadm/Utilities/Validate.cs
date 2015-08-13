@@ -60,9 +60,6 @@ namespace Fadm.Utilities
                 message = string.Empty;
             }
 
-            // Assert bound to the debugger
-            Debug.Assert(check, message);
-
             // Raise an exception if the check didn't pass
             if (!check)
             {

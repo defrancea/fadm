@@ -17,10 +17,6 @@
  * MA 02110-1301  USA
  */
 
-#if DEBUG
-#warning Use Release configuration for running unit tests.
-#endif 
-
 using System.Reflection;
 using System.Runtime.InteropServices;
 
