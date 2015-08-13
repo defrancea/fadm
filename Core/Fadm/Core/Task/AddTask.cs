@@ -166,7 +166,7 @@ namespace Fadm.Core.Task
                             .Add(afterBuild = new XElement[] { new XElement("{http://schemas.microsoft.com/developer/msbuild/2003}Target", new XAttribute("Name", "AfterBuild")) });
                     }
 
-                    // Generate target node if needed
+                    // Generate exec node if needed
                     if (!afterBuildExec.Any())
                     {
                         afterBuild
