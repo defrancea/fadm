@@ -20,8 +20,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
-using System.Xml;
+using System.Xml.Linq;
 using Fadm.Utilities;
 
 namespace Fadm.Core.Task
@@ -111,29 +112,74 @@ namespace Fadm.Core.Task
         {
             try
             {
-                // Parse the project as a xml document
-                XmlDocument document = new XmlDocument();
-                document.Load(path);
-                XmlNamespaceManager namespaceManager = new XmlNamespaceManager(document.NameTable);
-                namespaceManager.AddNamespace("ns", msBuildNamespace);
-
-                // Detect if the file already contains Fadm after build operation
-                if (IsFadmAdded(path, namespaceManager))
+                // Read the document from file system
+                XDocument document;
+                using (FileStream stream = new FileStream(path, FileMode.Open, FileAccess.Read))
                 {
-                    return new ExecutionResult(ExecutionResultStatus.Warning, string.Format("Fadm already in '{0}'", path));
+                    // Load the document
+                    document = XDocument.Load(stream);
+
+                    // Import project cached query
+                    var importProject = (
+                    from i in document
+                        .Descendants("{http://schemas.microsoft.com/developer/msbuild/2003}Project")
+                        .Descendants("{http://schemas.microsoft.com/developer/msbuild/2003}Import")
+                    where @"$(MSBuildToolsPath)\Microsoft.CSharp.targets" == (string)i.Attribute("Project")
+                    select i).ToArray();
+
+                    // After build cached query
+                    var afterBuild = (
+                    from t in document
+                        .Descendants("{http://schemas.microsoft.com/developer/msbuild/2003}Project")
+                        .Descendants("{http://schemas.microsoft.com/developer/msbuild/2003}Target")
+                    where "AfterBuild" == (string)t.Attribute("Name")
+                    select t).ToArray();
+
+                    // Fadm execute cached query
+                    var afterBuildExec = (
+                    from e in afterBuild
+                        .Descendants("{http://schemas.microsoft.com/developer/msbuild/2003}Exec")
+                    where "Fadm install $(TargetPath)" == (string)e.Attribute("Command")
+                    select e).ToArray();
+
+                    // Detect if the file already contains Fadm after build operation
+                    if (importProject.Any() && afterBuildExec.Any())
+                    {
+                        return new ExecutionResult(ExecutionResultStatus.Warning, string.Format("Fadm already in '{0}'", path));
+                    }
+
+                    // Generate build import
+                    if (!importProject.Any())
+                    {
+                        document
+                            .Descendants("{http://schemas.microsoft.com/developer/msbuild/2003}Project")
+                            .First()
+                            .Add(importProject = new [] { new XElement("{http://schemas.microsoft.com/developer/msbuild/2003}Import", new XAttribute("Project", @"$(MSBuildToolsPath)\Microsoft.CSharp.targets")) });
+                    }
+
+                    // Generate target node if needed
+                    if (!afterBuild.Any())
+                    {
+                        document
+                            .Descendants("{http://schemas.microsoft.com/developer/msbuild/2003}Project")
+                            .First()
+                            .Add(afterBuild = new XElement[] { new XElement("{http://schemas.microsoft.com/developer/msbuild/2003}Target", new XAttribute("Name", "AfterBuild")) });
+                    }
+
+                    // Generate target node if needed
+                    if (!afterBuildExec.Any())
+                    {
+                        afterBuild
+                            .First()
+                            .Add(afterBuildExec = new XElement[] { new XElement("{http://schemas.microsoft.com/developer/msbuild/2003}Exec", new XAttribute("Command", "Fadm install $(TargetPath)")) });
+                    }
                 }
 
-                // Generate build import
-                EnsureBuildImport(document, namespaceManager);
-
-                // Generate target node if needed
-                XmlNode postBuildEventNode = EnsureTargetAfterBuild(document, namespaceManager);
-
-                // Generate exec if needed
-                EnsureTargetAfterBuildExecute(document, postBuildEventNode, namespaceManager);
-
-                // Save the file
-                document.Save(path);
+                // Save the document to the file system
+                if (null != document)
+                {
+                    document.Save(path);
+                }
 
                 // Return the execution reuslt
                 return new ExecutionResult(ExecutionResultStatus.Success, string.Format("Fadm added to '{0}'", path));
@@ -143,108 +189,6 @@ namespace Fadm.Core.Task
                 //  Return the execution result
                 return new ExecutionResult(ExecutionResultStatus.Error, exception.Message);
             }
-        }
-
-        /// <summary>
-        /// Ensures that the document conains an after build target.
-        /// </summary>
-        /// <param name="document">The xml document.</param>
-        /// <param name="namespaceManager">The namespace manager.</param>
-        /// <returns>After build target node.</returns>
-        private XmlNode EnsureBuildImport(XmlDocument document, XmlNamespaceManager namespaceManager)
-        {
-            // Retrieve the node using xpath
-            XmlNode buildImportNode = document.SelectSingleNode(@"//ns:Project/ns:Import[@Project='$(MSBuildToolsPath)\Microsoft.CSharp.targets']", namespaceManager);
-
-            // Return it as it
-            if (null != buildImportNode)
-            {
-                return buildImportNode;
-            }
-
-            // Or create it if it doesn't exist
-            else
-            {
-                XmlElement createdBuildImportNode = document.CreateElement("Import", msBuildNamespace);
-                createdBuildImportNode.SetAttribute("Project", @"$(MSBuildToolsPath)\Microsoft.CSharp.targets");
-                document.DocumentElement.AppendChild(createdBuildImportNode);
-                return createdBuildImportNode;
-            }
-        }
-
-        /// <summary>
-        /// Ensures that the document conains an after build target.
-        /// </summary>
-        /// <param name="document">The xml document.</param>
-        /// <param name="namespaceManager">The namespace manager.</param>
-        /// <returns>After build target node.</returns>
-        private XmlNode EnsureTargetAfterBuild(XmlDocument document, XmlNamespaceManager namespaceManager)
-        {
-            // Retrieve the node using xpath
-            XmlNode postBuildEventNode = document.SelectSingleNode(@"//ns:Project/ns:Target[@Name='AfterBuild']", namespaceManager);
-
-            // Return it as it
-            if (null != postBuildEventNode)
-            {
-                return postBuildEventNode;
-            }
-
-            // Or create it if it doesn't exist
-            else
-            {
-                XmlElement afterBuildEventNode = document.CreateElement("Target", msBuildNamespace);
-                afterBuildEventNode.SetAttribute("Name", "AfterBuild");
-                document.DocumentElement.AppendChild(afterBuildEventNode);
-                return afterBuildEventNode;
-            }
-        }
-
-        /// <summary>
-        /// Ensures that the exec after build target node contains the Fadm exec command.
-        /// </summary>
-        /// <param name="document">The xml document.</param>
-        /// <param name="node">The node to add the exec command.</param>
-        /// <param name="namespaceManager">The namespace manager.</param>
-        /// <returns></returns>
-        private XmlNode EnsureTargetAfterBuildExecute(XmlDocument document, XmlNode node, XmlNamespaceManager namespaceManager)
-        {
-            // Retrieve the node using xpath
-            XmlNode execNode = node.SelectSingleNode(@"ns:Exec[@Command='Fadm install $(TargetPath)']", namespaceManager);
-
-            // Return it as it
-            if (null != execNode)
-            {
-                return execNode;
-            }
-
-            // Or create it if it doesn't exist
-            else
-            {
-                XmlElement execElementNode = document.CreateElement("Exec", msBuildNamespace);
-                execElementNode.SetAttribute("Command", @"Fadm install $(TargetPath)");
-                node.AppendChild(execElementNode);
-                return execElementNode;
-            }
-        }
-
-        /// <summary>
-        /// Determines wheter Fadm is already installed on this file.
-        /// </summary>
-        /// <param name="path">The file to check.</param>
-        /// <param name="namespaceManager">The namespace manager.</param>
-        /// <returns>True if already installed, False otherwise.</returns>
-        private bool IsFadmAdded(string path, XmlNamespaceManager namespaceManager)
-        {
-            // Parse the project as a xml document
-            XmlDocument document = new XmlDocument();
-            document.Load(path);
-
-            // After build execution added by Fadm
-            XmlNode postBuildEventNode = document.SelectSingleNode(@"//ns:Project/ns:Target[@Name='AfterBuild']/ns:Exec[@Command='Fadm install $(TargetPath)']", namespaceManager);
-            XmlNode buildImportNode = document.SelectSingleNode(@"//ns:Project/ns:Import[@Project='$(MSBuildToolsPath)\Microsoft.CSharp.targets']", namespaceManager);
-
-            // Return true if both nodes are in the document
-            return (null != postBuildEventNode && null != buildImportNode);
         }
     }
 }

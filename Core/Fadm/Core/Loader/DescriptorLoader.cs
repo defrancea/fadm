@@ -51,7 +51,7 @@ namespace Fadm.Core.Loader
             XmlSchema projectSchema = LoadProjectSchema();
             XmlReaderSettings settings = BuildSettings(projectSchema);
 
-            // Load the document
+            // Read the document from file system
             using (FileStream stream = new FileStream(fileName, FileMode.Open, FileAccess.Read))
             {
                 // Define schema from xsd
