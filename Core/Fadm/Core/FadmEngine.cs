@@ -17,7 +17,8 @@
  * MA 02110-1301  USA
  */
 
-using Fadm.Core.Task;
+using System.Threading.Tasks;
+using Fadm.Core.FadmTask;
 using Fadm.Utilities;
 
 namespace Fadm.Core
@@ -27,11 +28,6 @@ namespace Fadm.Core
     /// </summary>
     public class FadmEngine : IFadmEngine
     {
-        /// <summary>
-        /// The add task in charge of adding Fadm to solutions and project files.
-        /// </summary>
-        private IAddTask AddTask;
-
         /// <summary>
         /// The copy task in charge of retrieving the dependencies from the local storage.
         /// </summary>
@@ -46,25 +42,22 @@ namespace Fadm.Core
         /// Initializes a new instance of <see cref="FadmEngine"/>.
         /// </summary>
         public FadmEngine()
-            : this(new AddTask(), new CopyTask(), new InstallTask())
+            : this(new CopyTask(), new InstallTask())
         {
         }
 
         /// <summary>
         /// Initializes a new instance of <see cref="FadmEngine"/>.
         /// </summary>
-        /// <param name="addTask">The add task.</param>
         /// <param name="copyTask">The copy task.</param>
         /// <param name="installTask">The install task.</param>
-        public FadmEngine(IAddTask addTask, ICopyTask copyTask, IInstallTask installTask)
+        public FadmEngine(ICopyTask copyTask, IInstallTask installTask)
         {
             // Input validation
-            Validate.IsNotNull(addTask, "addTask must not be null.");
             Validate.IsNotNull(copyTask, "copyTask must not be null.");
             Validate.IsNotNull(installTask, "installTask must not be null.");
 
             // Initialize
-            this.AddTask = addTask;
             this.CopyTask = copyTask;
             this.InstallTask = installTask;
         }
@@ -74,13 +67,13 @@ namespace Fadm.Core
         /// </summary>
         /// <param name="path">The file to process.</param>
         /// <returns>The execution result.</returns>
-        public ExecutionResult Add(string path)
+        public async Task<ExecutionResult> AddAsync(string path)
         {
             // Input validation
             Validate.IsNotNullOrWhitespace(path, "path must not be null.");
 
             // Invoke the task
-            return AddTask.Add(path);
+            return await new AddTask(path).ExecuteAsync();
         }
 
         /// <summary>

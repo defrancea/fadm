@@ -17,18 +17,18 @@
  * MA 02110-1301  USA
  */
 
-namespace Fadm.Core.Task
+using System.Threading.Tasks;
+
+namespace Fadm.Core.FadmTask
 {
     /// <summary>
-    /// The add task in charge of adding Fadm to solutions and project files.
+    /// Defines an asynchronous fadm task.
     /// </summary>
-    public interface IAddTask
+    public interface ITask
     {
         /// <summary>
-        /// Adds Fadm installer to a solution or a project file.
+        /// Executes the task asynchronously.
         /// </summary>
-        /// <param name="path">The file to add the installer to.</param>
-        /// <returns>The execution result.</returns>
-        ExecutionResult Add(string path);
+        Task<ExecutionResult> ExecuteAsync();
     }
 }

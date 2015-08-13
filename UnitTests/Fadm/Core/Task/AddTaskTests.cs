@@ -21,7 +21,7 @@ using System;
 using System.IO;
 using System.Xml;
 using Fadm.Core;
-using Fadm.Core.Task;
+using Fadm.Core.FadmTask;
 using NUnit.Framework;
 
 namespace Fadm.CommandLine
@@ -33,28 +33,13 @@ namespace Fadm.CommandLine
     public class AddTaskTests
     {
         /// <summary>
-        /// The add task.
-        /// </summary>
-        public IAddTask AddTask { get; set; }
-
-        /// <summary>
-        /// Initializes <see cref="ExecutionResultFormatterTests"/>.
-        /// </summary>
-        [SetUp]
-        public void Initialize()
-        {
-            // Initialize
-            AddTask = new AddTask();
-        }
-
-        /// <summary>
         /// Tests Add(string) with null value.
         /// </summary>
         [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void AddNull()
         {
-            AddTask.Add(null);
+            new AddTask(null);
         }
 
         /// <summary>
@@ -71,7 +56,7 @@ namespace Fadm.CommandLine
             string destinationFile = sourceFile.Replace(".csproj", "Copy.csproj");
             File.Copy(sourceFile, destinationFile, true);
             Assert.AreEqual(alreadyExist, IsFadmAdded(destinationFile));
-            ExecutionResult result = AddTask.Add(destinationFile);
+            ExecutionResult result = new AddTask(destinationFile).ExecuteAsync().Result;
             Assert.AreEqual(executionResultStatus, result.Status);
             Assert.AreEqual(true, IsFadmAdded(destinationFile));
         }

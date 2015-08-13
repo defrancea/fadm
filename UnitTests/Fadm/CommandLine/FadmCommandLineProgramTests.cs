@@ -18,6 +18,7 @@
  */
 
 using System;
+using System.Threading.Tasks;
 using Fadm.Core;
 using Moq;
 using NUnit.Framework;
@@ -74,13 +75,13 @@ namespace Fadm.CommandLine
         {
             ExecutionResult result = null;
             Engine
-                .Setup(instance => instance.Add(It.IsAny<string>()))
-                .Returns(new ExecutionResult(ExecutionResultStatus.Error, "Add executed"));
+                .Setup(instance => instance.AddAsync(It.IsAny<string>()))
+                .Returns(Task.Run(() => new ExecutionResult(ExecutionResultStatus.Error, "Add executed")));
             Formatter
                 .Setup(instance => instance.Format(It.IsAny<ExecutionResult>()))
                 .Callback<ExecutionResult>(executionResult => result = executionResult);
             Program.Execute(new string[] { "add", "foo.sln" });
-            Engine.Verify(instance => instance.Add("foo.sln"));
+            Engine.Verify(instance => instance.AddAsync("foo.sln"));
 
             Assert.IsNotNull(result);
             Assert.AreEqual(ExecutionResultStatus.Error, result.Status);

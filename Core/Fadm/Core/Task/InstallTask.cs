@@ -22,7 +22,7 @@ using System.Linq;
 using System.Reflection;
 using Fadm.Utilities;
 
-namespace Fadm.Core.Task
+namespace Fadm.Core.FadmTask
 {
     /// <summary>
     /// The install task in charge of installing ressources to the local storage.

@@ -104,7 +104,7 @@ namespace Fadm.CommandLine
         /// <param name="add">The add command containing the user input.</param>
         public void Add(AddCommand add)
         {
-            ExecutionResult result = this.Engine.Add(add.FilePath);
+            ExecutionResult result = this.Engine.AddAsync(add.FilePath).Result;
             Console.WriteLine(Formatter.Format(result));
         }
 

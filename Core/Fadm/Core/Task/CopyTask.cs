@@ -24,7 +24,7 @@ using Fadm.Core.Loader;
 using Fadm.Model;
 using Fadm.Utilities;
 
-namespace Fadm.Core.Task
+namespace Fadm.Core.FadmTask
 {
     /// <summary>
     /// The copy task in charge of retrieving the dependencies from the local storage.

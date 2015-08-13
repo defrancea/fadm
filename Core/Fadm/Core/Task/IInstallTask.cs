@@ -17,7 +17,7 @@
  * MA 02110-1301  USA
  */
 
-namespace Fadm.Core.Task
+namespace Fadm.Core.FadmTask
 {
     /// <summary>
     /// The install task in charge of installing ressources to the local storage.

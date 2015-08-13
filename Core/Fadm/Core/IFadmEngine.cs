@@ -17,14 +17,21 @@
  * MA 02110-1301  USA
  */
 
-using Fadm.Core.Task;
+using System.Threading.Tasks;
+using Fadm.Core.FadmTask;
 
 namespace Fadm.Core
 {
     /// <summary>
     /// Fadm engine handling external operations.
     /// </summary>
-    public interface IFadmEngine : IAddTask, ICopyTask, IInstallTask
+    public interface IFadmEngine : ICopyTask, IInstallTask
     {
+        /// <summary>
+        /// Implements add task.
+        /// </summary>
+        /// <param name="path">The file to process.</param>
+        /// <returns>The execution result.</returns>
+        Task<ExecutionResult> AddAsync(string path);
     }
 }

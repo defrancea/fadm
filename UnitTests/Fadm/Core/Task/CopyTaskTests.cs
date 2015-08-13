@@ -21,7 +21,7 @@ using System;
 using System.Globalization;
 using System.IO;
 using Fadm.Core;
-using Fadm.Core.Task;
+using Fadm.Core.FadmTask;
 using Fadm.Utilities;
 using NUnit.Framework;
 
