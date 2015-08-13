@@ -41,7 +41,27 @@ namespace Fadm.Core.Task
         /// MSBUild descriptor's namespace.
         /// </summary>
         private string msBuildNamespace;
-        
+
+        /// <summary>
+        /// Identifies a Project node in csproj file.
+        /// </summary>
+        private const string NODE_PROJECT = "{http://schemas.microsoft.com/developer/msbuild/2003}Project";
+
+        /// <summary>
+        /// Identifies an Import node in csproj file.
+        /// </summary>
+        private const string NODE_IMPORT = "{http://schemas.microsoft.com/developer/msbuild/2003}Import";
+
+        /// <summary>
+        /// Identifies a Target node in csproj file.
+        /// </summary>
+        private const string NODE_TARGET = "{http://schemas.microsoft.com/developer/msbuild/2003}Target";
+
+        /// <summary>
+        /// Identifies an Exec node in csproj file.
+        /// </summary>
+        private const string NODE_EXEC = "{http://schemas.microsoft.com/developer/msbuild/2003}Exec";
+
         /// <summary>
         /// Initializes a new instance of <see cref="slnRegex"/>.
         /// </summary>
@@ -122,23 +142,23 @@ namespace Fadm.Core.Task
                     // Import project cached query
                     var importProject = (
                     from i in document
-                        .Descendants("{http://schemas.microsoft.com/developer/msbuild/2003}Project")
-                        .Descendants("{http://schemas.microsoft.com/developer/msbuild/2003}Import")
+                        .Descendants(NODE_PROJECT)
+                        .Descendants(NODE_IMPORT)
                     where @"$(MSBuildToolsPath)\Microsoft.CSharp.targets" == (string)i.Attribute("Project")
                     select i).ToArray();
 
                     // After build cached query
                     var afterBuild = (
                     from t in document
-                        .Descendants("{http://schemas.microsoft.com/developer/msbuild/2003}Project")
-                        .Descendants("{http://schemas.microsoft.com/developer/msbuild/2003}Target")
+                        .Descendants(NODE_PROJECT)
+                        .Descendants(NODE_TARGET)
                     where "AfterBuild" == (string)t.Attribute("Name")
                     select t).ToArray();
 
                     // Fadm execute cached query
                     var afterBuildExec = (
                     from e in afterBuild
-                        .Descendants("{http://schemas.microsoft.com/developer/msbuild/2003}Exec")
+                        .Descendants(NODE_EXEC)
                     where "Fadm install $(TargetPath)" == (string)e.Attribute("Command")
                     select e).ToArray();
 
@@ -152,18 +172,18 @@ namespace Fadm.Core.Task
                     if (!importProject.Any())
                     {
                         document
-                            .Descendants("{http://schemas.microsoft.com/developer/msbuild/2003}Project")
+                            .Descendants(NODE_PROJECT)
                             .First()
-                            .Add(importProject = new [] { new XElement("{http://schemas.microsoft.com/developer/msbuild/2003}Import", new XAttribute("Project", @"$(MSBuildToolsPath)\Microsoft.CSharp.targets")) });
+                            .Add(importProject = new [] { new XElement(NODE_IMPORT, new XAttribute("Project", @"$(MSBuildToolsPath)\Microsoft.CSharp.targets")) });
                     }
 
                     // Generate target node if needed
                     if (!afterBuild.Any())
                     {
                         document
-                            .Descendants("{http://schemas.microsoft.com/developer/msbuild/2003}Project")
+                            .Descendants(NODE_PROJECT)
                             .First()
-                            .Add(afterBuild = new XElement[] { new XElement("{http://schemas.microsoft.com/developer/msbuild/2003}Target", new XAttribute("Name", "AfterBuild")) });
+                            .Add(afterBuild = new XElement[] { new XElement(NODE_TARGET, new XAttribute("Name", "AfterBuild")) });
                     }
 
                     // Generate exec node if needed
@@ -171,7 +191,7 @@ namespace Fadm.Core.Task
                     {
                         afterBuild
                             .First()
-                            .Add(afterBuildExec = new XElement[] { new XElement("{http://schemas.microsoft.com/developer/msbuild/2003}Exec", new XAttribute("Command", "Fadm install $(TargetPath)")) });
+                            .Add(afterBuildExec = new XElement[] { new XElement(NODE_EXEC, new XAttribute("Command", "Fadm install $(TargetPath)")) });
                     }
                 }
 
