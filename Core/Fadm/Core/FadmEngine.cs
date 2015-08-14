@@ -29,33 +29,6 @@ namespace Fadm.Core
     public class FadmEngine : IFadmEngine
     {
         /// <summary>
-        /// The install task in charge of installing ressources to the local storage.
-        /// </summary>
-        private IInstallTask InstallTask;
-
-        /// <summary>
-        /// Initializes a new instance of <see cref="FadmEngine"/>.
-        /// </summary>
-        public FadmEngine()
-            : this(new InstallTask())
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of <see cref="FadmEngine"/>.
-        /// </summary>
-        /// <param name="copyTask">The copy task.</param>
-        /// <param name="installTask">The install task.</param>
-        public FadmEngine(IInstallTask installTask)
-        {
-            // Input validation
-            Validate.IsNotNull(installTask, "installTask must not be null.");
-
-            // Initialize
-            this.InstallTask = installTask;
-        }
-
-        /// <summary>
         /// Delegates to the add task.
         /// </summary>
         /// <param name="path">The file to process.</param>
@@ -88,13 +61,13 @@ namespace Fadm.Core
         /// </summary>
         /// <param name="path">The file to install.</param>
         /// <returns>The execution result.</returns>
-        public ExecutionResult Install(string path)
+        public async Task<ExecutionResult> InstallAsync(string path)
         {
             // Input validation
             Validate.IsNotNullOrWhitespace(path, "path must not be null.");
 
             // Invoke the task
-            return InstallTask.Install(path);
+            return await new InstallTask(path).ExecuteAsync();
         }
     }
 }

@@ -34,28 +34,13 @@ namespace Fadm.CommandLine
     public class InstallTaskTests
     {
         /// <summary>
-        /// The install task.
-        /// </summary>
-        public IInstallTask InstallTask { get; set; }
-
-        /// <summary>
-        /// Initializes <see cref="ExecutionResultFormatterTests"/>.
-        /// </summary>
-        [SetUp]
-        public void Initialize()
-        {
-            // Initialize
-            InstallTask = new InstallTask();
-        }
-
-        /// <summary>
         /// Tests Install(string) with null value.
         /// </summary>
         [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void InstallNull()
         {
-            InstallTask.Install(null);
+            new InstallTask(null);
         }
 
         /// <summary>
@@ -67,7 +52,7 @@ namespace Fadm.CommandLine
         [TestCase("Moq.xml")]
         public void InstallError(string fileName)
         {
-            ExecutionResult result = InstallTask.Install(fileName);
+            ExecutionResult result = new InstallTask(fileName).ExecuteAsync().Result;
             Assert.AreEqual(ExecutionResultStatus.Error, result.Status);
         }
 
@@ -81,9 +66,9 @@ namespace Fadm.CommandLine
         /// <param name="expectedSubStatus">The expected sub result stats.</param>
         /// <param name="expectedSubMessage">The expected sub result message.</param>
         [Test]
-        [TestCase("UTSample", "UTSampleDependency", "1.0.0.0", "dll", ExecutionResultStatus.Warning, "PDB not found at")]
-        [TestCase("UTSample", "Test", "1.0.0.0", "exe", ExecutionResultStatus.Warning, "PDB not found at")]
-        [TestCase("UTSampleWithPdb", "WithPdb", "1.0.0.0", "dll", ExecutionResultStatus.Success, "PDB installed to")]
+        [TestCase("UTSample", "UTSampleDependency", "1.0.0.0", "dll", ExecutionResultStatus.Warning, "Could not find file")]
+        [TestCase("UTSample", "Test", "1.0.0.0", "exe", ExecutionResultStatus.Warning, "Could not find file")]
+        [TestCase("UTSampleWithPdb", "WithPdb", "1.0.0.0", "dll", ExecutionResultStatus.Success, "installed to")]
         public void InstallSuccess(
             string ressourceFile,
             string dependencyName,
@@ -109,13 +94,13 @@ namespace Fadm.CommandLine
             Assert.AreEqual(false, File.Exists(dependencyFilePath));
 
             // Trigger install
-            ExecutionResult result = InstallTask.Install(ressourceFilePath);
+            ExecutionResult result = new InstallTask(ressourceFilePath).ExecuteAsync().Result;
 
             // Assert output
             Assert.AreEqual(ExecutionResultStatus.Success, result.Status);
-            Assert.AreEqual(1, result.SubExecutionResults.Length);
-            Assert.AreEqual(expectedSubStatus, result.SubExecutionResults[0].Status);
-            Assert.AreEqual(true, result.SubExecutionResults[0].Message.StartsWith(expectedSubMessage));
+            Assert.AreEqual(2, result.SubExecutionResults.Length);
+            Assert.AreEqual(expectedSubStatus, result.SubExecutionResults[1].Status);
+            Assert.AreEqual(true, result.SubExecutionResults[1].Message.Contains(expectedSubMessage));
             Assert.AreEqual(true, Directory.Exists(dependencyDirectoryPath));
             Assert.AreEqual(true, File.Exists(dependencyFilePath));
         }

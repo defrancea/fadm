@@ -34,21 +34,6 @@ namespace Fadm.CommandLine
     public class CopyTaskTests
     {
         /// <summary>
-        /// The install task.
-        /// </summary>
-        public IInstallTask InstallTask { get; set; }
-
-        /// <summary>
-        /// Initializes <see cref="ExecutionResultFormatterTests"/>.
-        /// </summary>
-        [SetUp]
-        public void Initialize()
-        {
-            // Initialize
-            InstallTask = new InstallTask();
-        }
-
-        /// <summary>
         /// Tests Copy(string) with null value.
         /// </summary>
         [Test]
@@ -106,8 +91,8 @@ namespace Fadm.CommandLine
             }
 
             // Trigger install
-            InstallTask.Install(string.Format(CultureInfo.InvariantCulture, "{0}.{1}", Path.Combine("Ressources", "Assembly", "UTSampleWithPdb"), "dll"));
-            InstallTask.Install(string.Format(CultureInfo.InvariantCulture, "{0}.{1}", Path.Combine("Ressources", "Assembly", "UTSample"), "dll"));
+            ExecutionResult install1result = new InstallTask(string.Format(CultureInfo.InvariantCulture, "{0}.{1}", Path.Combine("Ressources", "Assembly", "UTSampleWithPdb"), "dll")).ExecuteAsync().Result;
+            ExecutionResult install2result = new InstallTask(string.Format(CultureInfo.InvariantCulture, "{0}.{1}", Path.Combine("Ressources", "Assembly", "UTSample"), "dll")).ExecuteAsync().Result;
 
             // Trigger copy
             ExecutionResult resultCopy = new CopyTask(descriptorLocation).ExecuteAsync().Result;

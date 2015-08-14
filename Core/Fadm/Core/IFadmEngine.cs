@@ -25,7 +25,7 @@ namespace Fadm.Core
     /// <summary>
     /// Fadm engine handling external operations.
     /// </summary>
-    public interface IFadmEngine : IInstallTask
+    public interface IFadmEngine
     {
         /// <summary>
         /// Implements add task.
@@ -40,5 +40,12 @@ namespace Fadm.Core
         /// <param name="path">The file to process.</param>
         /// <returns>The execution result.</returns>
         Task<ExecutionResult> CopyAsync(string path);
+
+        /// <summary>
+        /// Implements install task.
+        /// </summary>
+        /// <param name="path">The file to process.</param>
+        /// <returns>The execution result.</returns>
+        Task<ExecutionResult> InstallAsync(string path);
     }
 }

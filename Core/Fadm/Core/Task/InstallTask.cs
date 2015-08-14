@@ -17,9 +17,12 @@
  * MA 02110-1301  USA
  */
 
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Fadm.Utilities;
 
 namespace Fadm.Core.FadmTask
@@ -27,7 +30,7 @@ namespace Fadm.Core.FadmTask
     /// <summary>
     /// The install task in charge of installing ressources to the local storage.
     /// </summary>
-    public class InstallTask : IInstallTask
+    public class InstallTask : ITask
     {
         /// <summary>
         /// Defines the allowed extensions.
@@ -40,63 +43,107 @@ namespace Fadm.Core.FadmTask
         private const string PDB_EXTENSION = ".pdb";
 
         /// <summary>
-        /// Installs a file to the local repository.
+        /// The target file path.
         /// </summary>
-        /// <param name="path">The file path to install.</param>
-        /// <returns>The execution result.</returns>
-        public ExecutionResult Install(string path)
+        private string targetfilepath;
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="InstallTask"/>.
+        /// <param name="path">The file to install.</param>
+        /// </summary>
+        public InstallTask(string path)
         {
             // Input validation
             Validate.IsNotNullOrWhitespace(path, "path must not be null.");
 
             // Ensure the path is absolute
-            path = Path.GetFullPath(path);
+            targetfilepath = Path.GetFullPath(path);
 
+        }
+        /// <summary>
+        /// Installs a file to the local repository.
+        /// </summary>
+        /// <returns>The execution result.</returns>
+        public async Task<ExecutionResult> ExecuteAsync()
+        {
             // Validate file existence
-            if (!File.Exists(path))
+            if (!File.Exists(targetfilepath))
             {
-                return new ExecutionResult(ExecutionResultStatus.Error, string.Format("The file '{0}' doesn't exist", path));
+                return new ExecutionResult(ExecutionResultStatus.Error, string.Format("The file '{0}' doesn't exist", targetfilepath));
             }
 
             // Only dll file supported for now
-            string extension = Path.GetExtension(path);
+            string extension = Path.GetExtension(targetfilepath);
             if (!allowedExtensions.Contains(extension))
             {
-                return new ExecutionResult(ExecutionResultStatus.Error, string.Format("The file '{0}' must have following extensions [{1}]", path, string.Join(",", allowedExtensions)));
+                return new ExecutionResult(ExecutionResultStatus.Error, string.Format("The file '{0}' must have following extensions [{1}]", targetfilepath, string.Join(",", allowedExtensions)));
             }
 
-            // Ensure that the repository exists
-            FileSystem.EnsureExistingDirectory(FileSystem.ComputeReporitoryPath());
-
-            // Load the assembly an retrieve information
-            Assembly assembly = Assembly.LoadFile(path);
-            string name = assembly.GetName().Name;
-            string version = assembly.GetName().Version.ToString();
-
-            // Compute the target path and ensure the dependency path existing in the local repository
-            string dependencyPath = FileSystem.ComputeDependencyDirectoryPath(name, version);
-            FileSystem.EnsureExistingDirectory(dependencyPath);
-
-            // Copy the dependency to the local repository
-            string fileTarget = FileSystem.ComputeDependencyFilePath(name, version, extension.Substring(1));
-            File.Copy(path, Path.Combine(dependencyPath, fileTarget), true);
-
-            // Copy the pdb if available
-            string pdbPath = Path.ChangeExtension(path, PDB_EXTENSION);
-            string pdbFileTarget = Path.ChangeExtension(fileTarget, PDB_EXTENSION);
-            ExecutionResult pdbExecutionResult;
-            if (File.Exists(pdbPath))
+            try
             {
-                File.Copy(pdbPath, Path.Combine(dependencyPath, pdbFileTarget), true);
-                pdbExecutionResult = new ExecutionResult(ExecutionResultStatus.Success, string.Format("PDB installed to '{0}'", pdbFileTarget));
-            }
-            else
-            {
-                pdbExecutionResult = new ExecutionResult(ExecutionResultStatus.Warning, string.Format("PDB not found at '{0}'", pdbPath));
+                // Ensure that the repository exists
+                FileSystem.EnsureExistingDirectory(FileSystem.ComputeReporitoryPath());
+
+                // Load the assembly an retrieve information
+                Assembly assembly = Assembly.LoadFile(targetfilepath);
+                string name = assembly.GetName().Name;
+                string version = assembly.GetName().Version.ToString();
+
+                // Compute the target path and ensure the dependency path existing in the local repository
+                string dependencyPath = FileSystem.ComputeDependencyDirectoryPath(name, version);
+                FileSystem.EnsureExistingDirectory(dependencyPath);
+
+                // Initialize task list
+                List<Task<ExecutionResult>> tasks = new List<Task<ExecutionResult>>();
+
+                // Copy the dependency file
+                string fileTarget = FileSystem.ComputeDependencyFilePath(name, version, extension.Substring(1));
+                tasks.Add(InstallFileAsync(targetfilepath, Path.Combine(dependencyPath, fileTarget), critical: true));
+
+                // Copy the pdb if available
+                string pdbPath = Path.ChangeExtension(targetfilepath, PDB_EXTENSION);
+                string pdbFileTarget = Path.ChangeExtension(fileTarget, PDB_EXTENSION);
+                tasks.Add(InstallFileAsync(pdbPath, Path.Combine(dependencyPath, pdbFileTarget), critical: false));
+
+                // Return execution result
+                await Task.WhenAll(tasks);
+                return new ExecutionResult(ExecutionResultStatus.Success, "Install executed", (from t in tasks select t.Result).ToArray());
             }
 
-            // Return execution result
-            return new ExecutionResult(ExecutionResultStatus.Success, string.Format("File installed to '{0}'", fileTarget), new ExecutionResult[] { pdbExecutionResult });
+            // Report error if any
+            catch (Exception exception)
+            {
+                return new ExecutionResult(ExecutionResultStatus.Error, exception.Message);
+            }
+        }
+
+        /// <summary>
+        /// Installs a file asynchronously.
+        /// </summary>
+        /// <param name="source">The location where the file is copied from.</param>
+        /// <param name="destination">The location where the file is copied to.</param>
+        /// <param name="critical">Whether critical execution.</param>
+        /// <returns>The execution result.</returns>
+        private async Task<ExecutionResult> InstallFileAsync(string source, string destination, bool critical)
+        {
+            try
+            {
+                // Perform copy asynchronously
+                using (FileStream sourceStream = File.OpenRead(source))
+                using (FileStream destinationStream = File.Create(destination))
+                {
+                    await sourceStream.CopyToAsync(destinationStream);
+                }
+
+                // Result result
+                return new ExecutionResult(ExecutionResultStatus.Success, string.Format("{0} installed to '{0}'", source, destination));
+            }
+
+            // Report error if any
+            catch (Exception exception)
+            {
+                return new ExecutionResult(critical ? ExecutionResultStatus.Error : ExecutionResultStatus.Warning, exception.Message);
+            }
         }
     }
 }

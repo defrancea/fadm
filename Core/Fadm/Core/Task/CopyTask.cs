@@ -34,7 +34,6 @@ namespace Fadm.Core.FadmTask
     /// </summary>
     public class CopyTask : ITask
     {
-
         /// <summary>
         /// The target file path.
         /// </summary>
@@ -59,34 +58,43 @@ namespace Fadm.Core.FadmTask
         /// <returns>The execution result.</returns>
         public async Task<ExecutionResult> ExecuteAsync()
         {
-            // Resolve descriptor path
-            string descriptorDirectory = targetfilepath;
-            if (!string.IsNullOrWhiteSpace(Path.GetExtension(targetfilepath)))
+            try
             {
-                descriptorDirectory = Path.GetDirectoryName(targetfilepath);
-            }
-            string descriptorPath = Path.Combine(descriptorDirectory, "fadm.xml");
+                // Resolve descriptor path
+                string descriptorDirectory = targetfilepath;
+                if (!string.IsNullOrWhiteSpace(Path.GetExtension(targetfilepath)))
+                {
+                    descriptorDirectory = Path.GetDirectoryName(targetfilepath);
+                }
+                string descriptorPath = Path.Combine(descriptorDirectory, "fadm.xml");
 
-            // Validate file existence
-            if (!File.Exists(descriptorPath))
+                // Validate file existence
+                if (!File.Exists(descriptorPath))
+                {
+                    return new ExecutionResult(ExecutionResultStatus.Error, string.Format("The file '{0}' doesn't exist", descriptorPath));
+                }
+
+                // Load descriptor
+                DescriptorLoader loader = new DescriptorLoader();
+                Project project = await loader.LoadAsync(descriptorPath);
+
+                // Process each dependencies
+                List<Task<ExecutionResult>> tasks = new List<Task<ExecutionResult>>();
+                foreach (Dependency dependency in project.Dependencies)
+                {
+                    tasks.Add(this.ProcessDependencyAsync(dependency, descriptorDirectory));
+                }
+
+                // Return execution result
+                await Task.WhenAll(tasks);
+                return new ExecutionResult(ExecutionResultStatus.Success, "Copy executed", (from r in tasks select r.Result).ToArray());
+            }
+
+            // Report error if any
+            catch (Exception exception)
             {
-                return new ExecutionResult(ExecutionResultStatus.Error, string.Format("The file '{0}' doesn't exist", descriptorPath));
+                return new ExecutionResult(ExecutionResultStatus.Error, exception.Message);
             }
-
-            // Load descriptor
-            DescriptorLoader loader = new DescriptorLoader();
-            Project project = await loader.LoadAsync(descriptorPath);
-
-            // Process each dependencies
-            List<Task<ExecutionResult>> processingTasks = new List<Task<ExecutionResult>>();
-            foreach (Dependency dependency in project.Dependencies)
-            {
-                processingTasks.Add(this.ProcessDependencyAsync(dependency, descriptorDirectory));
-            }
-
-            // Return execution result
-            Task.WaitAll(processingTasks.ToArray());
-            return new ExecutionResult(ExecutionResultStatus.Success, "Dependencies copied successfully", (from r in processingTasks select r.Result).ToArray());
         }
 
         /// <summary>
@@ -130,7 +138,7 @@ namespace Fadm.Core.FadmTask
 
                 // Copy dependency
                 FileSystem.EnsureExistingDirectory(targetDependencyPath);
-                using (FileStream sourceStream = File.Open(dependencyFile, FileMode.Open))
+                using (FileStream sourceStream = File.OpenRead(dependencyFile))
                 using (FileStream destinationStream = File.Create(targetFilePath))
                 {
                     await sourceStream.CopyToAsync(destinationStream);

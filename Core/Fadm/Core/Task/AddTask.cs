@@ -64,7 +64,7 @@ namespace Fadm.Core.FadmTask
         private string targetfilepath;
 
         /// <summary>
-        /// Initializes a new instance of <see cref="slnRegex"/>.
+        /// Initializes a new instance of <see cref="AddTask"/>.
         /// <param name="path">The file to add the installer to.</param>
         /// </summary>
         public AddTask(string path)
@@ -89,48 +89,58 @@ namespace Fadm.Core.FadmTask
                 return new ExecutionResult(ExecutionResultStatus.Error, string.Format("The file '{0}' doesn't exist", targetfilepath));
             }
 
-            // If the file is not a solution file, directly process the file
-            string extension = Path.GetExtension(targetfilepath);
-            if (".sln" != extension)
+            try
             {
-                return await ProcessProjectFileAsync(targetfilepath);
-            }
-
-            // Parse the solution file in order to extract the file to process and close the file as soon as possible
-            using (TextReader reader = new StreamReader(targetfilepath))
-            {
-                // Read the file line per line
-                string line;
-                List<string> fileToProcess = new List<string>();
-                while ((line = reader.ReadLine()) != null)
+                // If the file is not a solution file, directly process the file
+                string extension = Path.GetExtension(targetfilepath);
+                if (".sln" != extension)
                 {
-                    // In we find a math, extract the third group (project's file) and process it
-                    Match match = slnRegex.Match(line);
-                    if (match.Success)
-                    {
-                        string projectFile = match.Groups[3].Value;
-                        string filePath = Path.Combine(Path.GetDirectoryName(targetfilepath), projectFile);
+                    return await ProcessProjectFileAsync(targetfilepath);
+                }
 
-                        // sln file Could reference directories as project to organize the solution.
-                        // There is no way to differencate both definitions so testing that the file exists is required.
-                        if (File.Exists(filePath))
+                // Parse the solution file in order to extract the file to process and close the file as soon as possible
+                List<string> fileToProcess = new List<string>();
+                using (TextReader reader = new StreamReader(targetfilepath))
+                {
+                    // Read the file line per line
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        // In we find a math, extract the third group (project's file) and process it
+                        Match match = slnRegex.Match(line);
+                        if (match.Success)
                         {
-                            fileToProcess.Add(filePath);
+                            string projectFile = match.Groups[3].Value;
+                            string filePath = Path.Combine(Path.GetDirectoryName(targetfilepath), projectFile);
+
+                            // sln file Could reference directories as project to organize the solution.
+                            // There is no way to differencate both definitions so testing that the file exists is required.
+                            if (File.Exists(filePath))
+                            {
+                                fileToProcess.Add(filePath);
+                            }
                         }
                     }
                 }
 
                 // Start processing
-                List<Task<ExecutionResult>> results = new List<Task<ExecutionResult>>();
+                List<Task<ExecutionResult>> tasks = new List<Task<ExecutionResult>>();
                 foreach (string filePath in fileToProcess)
                 {
-                    results.Add(this.ProcessProjectFileAsync(filePath));
+                    tasks.Add(this.ProcessProjectFileAsync(filePath));
                 }
 
                 // Return execution result
-                Task.WaitAll(results.ToArray());
-                return new ExecutionResult(ExecutionResultStatus.Success, string.Format("Solution '{0}' processed", targetfilepath), (from r in results select r.Result).ToArray());
+                await Task.WhenAll(tasks);
+                return new ExecutionResult(ExecutionResultStatus.Success, string.Format("Solution '{0}' processed", targetfilepath), (from r in tasks select r.Result).ToArray());
             }
+
+            // Report error if any
+            catch (Exception exception)
+            {
+                return new ExecutionResult(ExecutionResultStatus.Error, exception.Message);
+            }
+
         }
 
         /// <summary>

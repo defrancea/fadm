@@ -117,13 +117,13 @@ namespace Fadm.CommandLine
         {
             ExecutionResult result = null;
             Engine
-                .Setup(instance => instance.Install(It.IsAny<string>()))
-                .Returns(new ExecutionResult(ExecutionResultStatus.Success, "Install executed"));
+                .Setup(instance => instance.InstallAsync(It.IsAny<string>()))
+                .Returns(Task.Run(() => new ExecutionResult(ExecutionResultStatus.Success, "Install executed")));
             Formatter
                 .Setup(instance => instance.Format(It.IsAny<ExecutionResult>()))
                 .Callback<ExecutionResult>(executionResult => result = executionResult);
             Program.Execute(new string[] { "install", "foo.dll" });
-            Engine.Verify(instance => instance.Install("foo.dll"));
+            Engine.Verify(instance => instance.InstallAsync("foo.dll"));
 
             Assert.IsNotNull(result);
             Assert.AreEqual(ExecutionResultStatus.Success, result.Status);

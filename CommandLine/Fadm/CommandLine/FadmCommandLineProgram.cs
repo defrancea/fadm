@@ -124,7 +124,7 @@ namespace Fadm.CommandLine
         /// <param name="install">The install method containing the user input.</param>
         public void Install(InstallCommand install)
         {
-            ExecutionResult result = this.Engine.Install(install.FilePath);
+            ExecutionResult result = this.Engine.InstallAsync(install.FilePath).Result;
             Console.WriteLine(Formatter.Format(result));
         }
     }
