@@ -19,7 +19,6 @@
 
 using System;
 using System.IO;
-using System.Xml;
 using Fadm.Model;
 using NUnit.Framework;
 
@@ -53,10 +52,10 @@ namespace Fadm.Core.Loader
         [TestCase(null)]
         [TestCase("")]
         [TestCase("doesn't exist")]
-        [ExpectedException(typeof(ArgumentException))]
+        [ExpectedException(typeof(AggregateException))]
         public void LoadEmpty(string invalidFileName)
         {
-            this.DescriptorBuilder.Load(invalidFileName);
+            Project project = this.DescriptorBuilder.LoadAsync(invalidFileName).Result;
         }
 
         /// <summary>
@@ -67,10 +66,10 @@ namespace Fadm.Core.Loader
         [TestCase("InvalidProject.xml")]
         [TestCase("NoXml.xml")]
         [TestCase("Empty.xml")]
-        [ExpectedException(typeof(XmlException))]
+        [ExpectedException(typeof(AggregateException))]
         public void LoadInvalid(string fileName)
         {
-            this.DescriptorBuilder.Load(Path.Combine("Ressources", "Project", fileName));
+            Project project = this.DescriptorBuilder.LoadAsync(Path.Combine("Ressources", "Project", fileName)).Result;
         }
 
         /// <summary>
@@ -95,7 +94,7 @@ namespace Fadm.Core.Loader
         {
             // Load the descriptor
             string path = Path.Combine("Ressources", "Project", "SimpleProject.xml");
-            Project project = new DescriptorLoader().Load(path);
+            Project project = new DescriptorLoader().LoadAsync(path).Result;
 
             // Assert
             Assert.AreEqual(expectedName, project.Dependencies[index].Name);

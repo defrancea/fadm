@@ -96,13 +96,12 @@ namespace Fadm.Core.FadmTask
                 return await ProcessProjectFileAsync(targetfilepath);
             }
 
-            // Process the solution file in order to determine projects to process
-            List<ExecutionResult> projectProcessingExecutionResult = new List<ExecutionResult>();
+            // Parse the solution file in order to extract the file to process and close the file as soon as possible
             using (TextReader reader = new StreamReader(targetfilepath))
             {
                 // Read the file line per line
                 string line;
-                List<Task<ExecutionResult>> results = new List<Task<ExecutionResult>>();
+                List<string> fileToProcess = new List<string>();
                 while ((line = reader.ReadLine()) != null)
                 {
                     // In we find a math, extract the third group (project's file) and process it
@@ -116,20 +115,21 @@ namespace Fadm.Core.FadmTask
                         // There is no way to differencate both definitions so testing that the file exists is required.
                         if (File.Exists(filePath))
                         {
-                            results.Add(this.ProcessProjectFileAsync(filePath));
+                            fileToProcess.Add(filePath);
                         }
                     }
                 }
 
-                // Wait and collect execution results
-                Task.WaitAll(results.ToArray());
-                foreach (ExecutionResult result in from r in results select r.Result)
+                // Start processing
+                List<Task<ExecutionResult>> results = new List<Task<ExecutionResult>>();
+                foreach (string filePath in fileToProcess)
                 {
-                    projectProcessingExecutionResult.Add(result);
+                    results.Add(this.ProcessProjectFileAsync(filePath));
                 }
 
-                // Return execution result.
-                return new ExecutionResult(ExecutionResultStatus.Success, string.Format("Solution '{0}' processed", targetfilepath), projectProcessingExecutionResult.ToArray());
+                // Return execution result
+                Task.WaitAll(results.ToArray());
+                return new ExecutionResult(ExecutionResultStatus.Success, string.Format("Solution '{0}' processed", targetfilepath), (from r in results select r.Result).ToArray());
             }
         }
 
@@ -150,61 +150,61 @@ namespace Fadm.Core.FadmTask
                     // Load the document
                     string content = await reader.ReadToEndAsync();
                     document = XDocument.Parse(content);
+                }
 
-                    // Import project cached query
-                    var importProject = (
-                    from i in document
+                // Import project cached query
+                var importProject = (
+                from i in document
+                    .Descendants(NODE_PROJECT)
+                    .Descendants(NODE_IMPORT)
+                where @"$(MSBuildToolsPath)\Microsoft.CSharp.targets" == (string)i.Attribute("Project")
+                select i).ToArray();
+
+                // After build cached query
+                var afterBuild = (
+                from t in document
+                    .Descendants(NODE_PROJECT)
+                    .Descendants(NODE_TARGET)
+                where "AfterBuild" == (string)t.Attribute("Name")
+                select t).ToArray();
+
+                // Fadm execute cached query
+                var afterBuildExec = (
+                from e in afterBuild
+                    .Descendants(NODE_EXEC)
+                where "Fadm install $(TargetPath)" == (string)e.Attribute("Command")
+                select e).ToArray();
+
+                // Detect if the file already contains Fadm after build operation
+                if (importProject.Any() && afterBuildExec.Any())
+                {
+                    return new ExecutionResult(ExecutionResultStatus.Warning, string.Format("Fadm already in '{0}'", path));
+                }
+
+                // Generate build import
+                if (!importProject.Any())
+                {
+                    document
                         .Descendants(NODE_PROJECT)
-                        .Descendants(NODE_IMPORT)
-                    where @"$(MSBuildToolsPath)\Microsoft.CSharp.targets" == (string)i.Attribute("Project")
-                    select i).ToArray();
+                        .First()
+                        .Add(importProject = new[] { new XElement(NODE_IMPORT, new XAttribute("Project", @"$(MSBuildToolsPath)\Microsoft.CSharp.targets")) });
+                }
 
-                    // After build cached query
-                    var afterBuild = (
-                    from t in document
+                // Generate target node if needed
+                if (!afterBuild.Any())
+                {
+                    document
                         .Descendants(NODE_PROJECT)
-                        .Descendants(NODE_TARGET)
-                    where "AfterBuild" == (string)t.Attribute("Name")
-                    select t).ToArray();
+                        .First()
+                        .Add(afterBuild = new[] { new XElement(NODE_TARGET, new XAttribute("Name", "AfterBuild")) });
+                }
 
-                    // Fadm execute cached query
-                    var afterBuildExec = (
-                    from e in afterBuild
-                        .Descendants(NODE_EXEC)
-                    where "Fadm install $(TargetPath)" == (string)e.Attribute("Command")
-                    select e).ToArray();
-
-                    // Detect if the file already contains Fadm after build operation
-                    if (importProject.Any() && afterBuildExec.Any())
-                    {
-                        return new ExecutionResult(ExecutionResultStatus.Warning, string.Format("Fadm already in '{0}'", path));
-                    }
-
-                    // Generate build import
-                    if (!importProject.Any())
-                    {
-                        document
-                            .Descendants(NODE_PROJECT)
-                            .First()
-                            .Add(importProject = new[] { new XElement(NODE_IMPORT, new XAttribute("Project", @"$(MSBuildToolsPath)\Microsoft.CSharp.targets")) });
-                    }
-
-                    // Generate target node if needed
-                    if (!afterBuild.Any())
-                    {
-                        document
-                            .Descendants(NODE_PROJECT)
-                            .First()
-                            .Add(afterBuild = new[] { new XElement(NODE_TARGET, new XAttribute("Name", "AfterBuild")) });
-                    }
-
-                    // Generate exec node if needed
-                    if (!afterBuildExec.Any())
-                    {
-                        afterBuild
-                            .First()
-                            .Add(afterBuildExec = new[] { new XElement(NODE_EXEC, new XAttribute("Command", "Fadm install $(TargetPath)")) });
-                    }
+                // Generate exec node if needed
+                if (!afterBuildExec.Any())
+                {
+                    afterBuild
+                        .First()
+                        .Add(afterBuildExec = new[] { new XElement(NODE_EXEC, new XAttribute("Command", "Fadm install $(TargetPath)")) });
                 }
 
                 // Save the document to the file system

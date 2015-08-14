@@ -114,7 +114,7 @@ namespace Fadm.CommandLine
         /// <param name="add">The copy command containing the user input.</param>
         public void Copy(CopyCommand copy)
         {
-            ExecutionResult result = this.Engine.Copy(copy.FilePath);
+            ExecutionResult result = this.Engine.CopyAsync(copy.FilePath).Result;
             Console.WriteLine(Formatter.Format(result));
         }
 

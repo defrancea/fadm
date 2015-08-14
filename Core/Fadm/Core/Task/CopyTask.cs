@@ -17,9 +17,12 @@
  * MA 02110-1301  USA
  */
 
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using Fadm.Core.Loader;
 using Fadm.Model;
 using Fadm.Utilities;
@@ -29,26 +32,38 @@ namespace Fadm.Core.FadmTask
     /// <summary>
     /// The copy task in charge of retrieving the dependencies from the local storage.
     /// </summary>
-    public class CopyTask : ICopyTask
+    public class CopyTask : ITask
     {
+
         /// <summary>
-        /// Copy the dependencies from the local repository.
+        /// The target file path.
         /// </summary>
-        /// <param name="path">The file path to copy the dependencies for.</param>
-        /// <returns>The execution result.</returns>
-        public ExecutionResult Copy(string path)
+        private string targetfilepath;
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="CopyTask"/>.
+        /// <param name="path">The file to copy.</param>
+        /// </summary>
+        public CopyTask(string path)
         {
             // Input validation
             Validate.IsNotNullOrWhitespace(path, "path must not be null.");
 
-            // Ensure the path is absolute
-            path = Path.GetFullPath(path);
+            // Initialize
+            targetfilepath = Path.GetFullPath(path);
+        }
 
+        /// <summary>
+        /// Copy the dependencies from the local repository.
+        /// </summary>
+        /// <returns>The execution result.</returns>
+        public async Task<ExecutionResult> ExecuteAsync()
+        {
             // Resolve descriptor path
-            string descriptorDirectory = path;
-            if (!string.IsNullOrWhiteSpace(Path.GetExtension(path)))
+            string descriptorDirectory = targetfilepath;
+            if (!string.IsNullOrWhiteSpace(Path.GetExtension(targetfilepath)))
             {
-                descriptorDirectory = Path.GetDirectoryName(path);
+                descriptorDirectory = Path.GetDirectoryName(targetfilepath);
             }
             string descriptorPath = Path.Combine(descriptorDirectory, "fadm.xml");
 
@@ -60,11 +75,29 @@ namespace Fadm.Core.FadmTask
 
             // Load descriptor
             DescriptorLoader loader = new DescriptorLoader();
-            Project project = loader.Load(descriptorPath);
+            Project project = await loader.LoadAsync(descriptorPath);
 
             // Process each dependencies
-            List<ExecutionResult> subExecutionResults = new List<ExecutionResult>();
+            List<Task<ExecutionResult>> processingTasks = new List<Task<ExecutionResult>>();
             foreach (Dependency dependency in project.Dependencies)
+            {
+                processingTasks.Add(this.ProcessDependencyAsync(dependency, descriptorDirectory));
+            }
+
+            // Return execution result
+            Task.WaitAll(processingTasks.ToArray());
+            return new ExecutionResult(ExecutionResultStatus.Success, "Dependencies copied successfully", (from r in processingTasks select r.Result).ToArray());
+        }
+
+        /// <summary>
+        /// Procces a dependency asynchronously.
+        /// </summary>
+        /// <param name="dependency">The dependency to process.</param>
+        /// <param name="baseDirectory">The base directory.</param>
+        /// <returns>The execution result.</returns>
+        private async Task<ExecutionResult> ProcessDependencyAsync(Dependency dependency, string baseDirectory)
+        {
+            try
             {
                 // Read from model
                 string name = dependency.Name;
@@ -78,37 +111,40 @@ namespace Fadm.Core.FadmTask
                 // Check the dependency exists
                 if (!File.Exists(dependencyFile))
                 {
-                    subExecutionResults.Add(new ExecutionResult(
+                    return new ExecutionResult(
                         ExecutionResultStatus.Error,
-                        string.Format(CultureInfo.InvariantCulture, "Dependency '{0}' unknown", dependencyFile)));
-                    continue;
+                        string.Format(CultureInfo.InvariantCulture, "Dependency '{0}' unknown", dependencyFile));
                 }
 
                 // Compute target path
-                string targetDependencyPath = Path.Combine(descriptorDirectory, "dependency");
+                string targetDependencyPath = Path.Combine(baseDirectory, "dependency");
                 string targetFilePath = Path.Combine(targetDependencyPath, targetFile);
 
                 // Check the dependecy already copied
                 if (File.Exists(targetFilePath))
                 {
-                    subExecutionResults.Add(new ExecutionResult(
+                    return new ExecutionResult(
                         ExecutionResultStatus.Warning,
-                        string.Format(CultureInfo.InvariantCulture, "Dependency '{0}' already copied", targetFilePath)));
-                    continue;
+                        string.Format(CultureInfo.InvariantCulture, "Dependency '{0}' already copied", targetFilePath));
                 }
 
                 // Copy dependency
                 FileSystem.EnsureExistingDirectory(targetDependencyPath);
-                File.Copy(dependencyFile, targetFilePath, true);
+                using (FileStream sourceStream = File.Open(dependencyFile, FileMode.Open))
+                using (FileStream destinationStream = File.Create(targetFilePath))
+                {
+                    await sourceStream.CopyToAsync(destinationStream);
+                }
 
                 // Compute sub execution result
-                subExecutionResults.Add(new ExecutionResult(
+                return new ExecutionResult(
                     ExecutionResultStatus.Success,
-                    string.Format(CultureInfo.InvariantCulture, "Dependency '{0}' copied successfully", targetFilePath)));
+                    string.Format(CultureInfo.InvariantCulture, "Dependency '{0}' copied successfully", targetFilePath));
             }
-
-            // Return execution result
-            return new ExecutionResult(ExecutionResultStatus.Success, "Dependencies copied successfully", subExecutionResults.ToArray());
+            catch (Exception exception)
+            {
+                return new ExecutionResult(ExecutionResultStatus.Error, exception.Message);
+            }
         }
     }
 }

@@ -96,13 +96,13 @@ namespace Fadm.CommandLine
         {
             ExecutionResult result = null;
             Engine
-                .Setup(instance => instance.Copy(It.IsAny<string>()))
-                .Returns(new ExecutionResult(ExecutionResultStatus.Error, "Copy executed"));
+                .Setup(instance => instance.CopyAsync(It.IsAny<string>()))
+                .Returns(Task.Run(() => new ExecutionResult(ExecutionResultStatus.Error, "Copy executed")));
             Formatter
                 .Setup(instance => instance.Format(It.IsAny<ExecutionResult>()))
                 .Callback<ExecutionResult>(executionResult => result = executionResult);
             Program.Execute(new string[] { "copy", "foo.csproj" });
-            Engine.Verify(instance => instance.Copy("foo.csproj"));
+            Engine.Verify(instance => instance.CopyAsync("foo.csproj"));
 
             Assert.IsNotNull(result);
             Assert.AreEqual(ExecutionResultStatus.Error, result.Status);

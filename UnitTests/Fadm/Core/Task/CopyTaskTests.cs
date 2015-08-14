@@ -39,11 +39,6 @@ namespace Fadm.CommandLine
         public IInstallTask InstallTask { get; set; }
 
         /// <summary>
-        /// The copy task.
-        /// </summary>
-        public ICopyTask CopyTask { get; set; }
-
-        /// <summary>
         /// Initializes <see cref="ExecutionResultFormatterTests"/>.
         /// </summary>
         [SetUp]
@@ -51,7 +46,6 @@ namespace Fadm.CommandLine
         {
             // Initialize
             InstallTask = new InstallTask();
-            CopyTask = new CopyTask();
         }
 
         /// <summary>
@@ -61,7 +55,7 @@ namespace Fadm.CommandLine
         [ExpectedException(typeof(ArgumentException))]
         public void CopyNull()
         {
-            CopyTask.Copy(null);
+            new CopyTask(null);
         }
 
         /// <summary>
@@ -73,7 +67,7 @@ namespace Fadm.CommandLine
         [TestCase("Moq.xml")]
         public void CopyError(string fileName)
         {
-            ExecutionResult result = CopyTask.Copy(fileName);
+            ExecutionResult result = new CopyTask(fileName).ExecuteAsync().Result;
             Assert.AreEqual(ExecutionResultStatus.Error, result.Status);
         }
 
@@ -116,7 +110,7 @@ namespace Fadm.CommandLine
             InstallTask.Install(string.Format(CultureInfo.InvariantCulture, "{0}.{1}", Path.Combine("Ressources", "Assembly", "UTSample"), "dll"));
 
             // Trigger copy
-            ExecutionResult resultCopy = CopyTask.Copy(descriptorLocation);
+            ExecutionResult resultCopy = new CopyTask(descriptorLocation).ExecuteAsync().Result;
             Assert.AreEqual(ExecutionResultStatus.Success, resultCopy.Status);
 
             // Assert output

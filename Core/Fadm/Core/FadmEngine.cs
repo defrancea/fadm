@@ -29,11 +29,6 @@ namespace Fadm.Core
     public class FadmEngine : IFadmEngine
     {
         /// <summary>
-        /// The copy task in charge of retrieving the dependencies from the local storage.
-        /// </summary>
-        private ICopyTask CopyTask;
-
-        /// <summary>
         /// The install task in charge of installing ressources to the local storage.
         /// </summary>
         private IInstallTask InstallTask;
@@ -42,7 +37,7 @@ namespace Fadm.Core
         /// Initializes a new instance of <see cref="FadmEngine"/>.
         /// </summary>
         public FadmEngine()
-            : this(new CopyTask(), new InstallTask())
+            : this(new InstallTask())
         {
         }
 
@@ -51,14 +46,12 @@ namespace Fadm.Core
         /// </summary>
         /// <param name="copyTask">The copy task.</param>
         /// <param name="installTask">The install task.</param>
-        public FadmEngine(ICopyTask copyTask, IInstallTask installTask)
+        public FadmEngine(IInstallTask installTask)
         {
             // Input validation
-            Validate.IsNotNull(copyTask, "copyTask must not be null.");
             Validate.IsNotNull(installTask, "installTask must not be null.");
 
             // Initialize
-            this.CopyTask = copyTask;
             this.InstallTask = installTask;
         }
 
@@ -81,13 +74,13 @@ namespace Fadm.Core
         /// </summary>
         /// <param name="path">The file to process.</param>
         /// <returns>The execution result.</returns>
-        public ExecutionResult Copy(string path)
+        public async Task<ExecutionResult> CopyAsync(string path)
         {
             // Input validation
             Validate.IsNotNullOrWhitespace(path, "path must not be null.");
 
             // Invoke the task
-            return CopyTask.Copy(path);
+            return await new CopyTask(path).ExecuteAsync();
         }
 
         /// <summary>

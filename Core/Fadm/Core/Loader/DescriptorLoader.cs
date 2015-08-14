@@ -22,6 +22,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Schema;
@@ -41,41 +42,40 @@ namespace Fadm.Core.Loader
         /// </summary>
         /// <param name="fileName">The project descriptor to load.</param>
         /// <returns>The loaded descriptor.</returns>
-        public Project Load(string fileName)
+        public async Task<Project> LoadAsync(string fileName)
         {
             // Input validation
             Validate.IsNotNullOrWhitespace(fileName, "The filename must be set.");
             Validate.IsTrue(File.Exists(fileName), string.Format(CultureInfo.InvariantCulture, "Descriptor {0} not found.", fileName));
 
-            // Initialize ressources
-            XmlSchema projectSchema = LoadProjectSchema();
-            XmlReaderSettings settings = BuildSettings(projectSchema);
-
             // Read the document from file system
+            XDocument document;
             using (FileStream stream = new FileStream(fileName, FileMode.Open, FileAccess.Read))
+            using (StreamReader reader = new StreamReader(stream))
             {
-                // Define schema from xsd
-                XmlSchemaSet schemas = new XmlSchemaSet();
-                schemas.Add("urn:project-schema", XmlReader.Create(new StringReader(Ressources.PROJECT_SCHEMA)));
-
-                // Load xml document and validate the content
-                XDocument document = XDocument.Load(stream);
-                document.Validate(schemas, (sender, evt) => { throw new XmlException(evt.Message, evt.Exception); });
-
-                // Build and return the project
-                return new Project((
-                    from d in document
-                        .Descendants("{urn:project-schema}Project")
-                        .Descendants("{urn:project-schema}Dependencies")
-                        .Descendants("{urn:project-schema}Dependency")
-                    select new Dependency(
-                        d.Descendants("{urn:project-schema}Name").First().Value,
-                        Version.Parse(d.Descendants("{urn:project-schema}Version").First().Value),
-                        ParseCulture(d.Descendants("{urn:project-schema}Culture").Select(culture => culture.Value).FirstOrDefault()),
-                        ParseArchitecture(d.Descendants("{urn:project-schema}Architecture").Select(arch => arch.Value).FirstOrDefault())
-                        )
-                    ).ToArray());
+                // Load the document
+                string content = await reader.ReadToEndAsync();
+                document = XDocument.Parse(content);
             }
+
+            // Define schema from xsd and validate
+            XmlSchemaSet schemas = new XmlSchemaSet();
+            schemas.Add("urn:project-schema", XmlReader.Create(new StringReader(Ressources.PROJECT_SCHEMA)));
+            document.Validate(schemas, (sender, evt) => { throw new XmlException(evt.Message, evt.Exception); });
+
+            // Build and return the project
+            return new Project((
+                from d in document
+                    .Descendants("{urn:project-schema}Project")
+                    .Descendants("{urn:project-schema}Dependencies")
+                    .Descendants("{urn:project-schema}Dependency")
+                select new Dependency(
+                    d.Descendants("{urn:project-schema}Name").First().Value,
+                    Version.Parse(d.Descendants("{urn:project-schema}Version").First().Value),
+                    ParseCulture(d.Descendants("{urn:project-schema}Culture").Select(culture => culture.Value).FirstOrDefault()),
+                    ParseArchitecture(d.Descendants("{urn:project-schema}Architecture").Select(arch => arch.Value).FirstOrDefault())
+                    )
+                ).ToArray());
         }
 
         /// <summary>
