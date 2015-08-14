@@ -26,6 +26,7 @@ using System.Threading.Tasks;
 using Fadm.Core.Loader;
 using Fadm.Model;
 using Fadm.Utilities;
+using NuGet;
 
 namespace Fadm.Core.FadmTask
 {
@@ -119,9 +120,36 @@ namespace Fadm.Core.FadmTask
                 // Check the dependency exists
                 if (!File.Exists(dependencyFile))
                 {
-                    return new ExecutionResult(
-                        ExecutionResultStatus.Error,
-                        string.Format(CultureInfo.InvariantCulture, "Dependency '{0}' unknown", dependencyFile));
+                    // Search for the dependency in nuget central
+                    IPackageRepository repository = PackageRepositoryFactory.Default.CreateRepository("https://packages.nuget.org/api/v2");
+                    IPackage package;
+                    if (!repository.TryFindPackage(dependency.Name, SemanticVersion.Parse(dependency.Version.ToString()), out package))
+                    {
+                        // Report error if not found
+                        return new ExecutionResult(
+                            ExecutionResultStatus.Error,
+                            string.Format(CultureInfo.InvariantCulture, "Dependency {0}:{1} unknown", dependency.Name, dependency.Version));
+                    }
+
+                    // Look for matching lib file
+                    string nugetLibFile = string.Format(CultureInfo.InvariantCulture, "{0}{1}", dependency.Name, Path.GetExtension(dependencyFile));
+                    IPackageFile[] matchingFile = (from l in package.GetLibFiles() where l.EffectivePath == nugetLibFile select l).ToArray();
+
+                    // Report error if not file found
+                    if (!matchingFile.Any())
+                    {
+                        return new ExecutionResult(
+                            ExecutionResultStatus.Error,
+                            string.Format(CultureInfo.InvariantCulture, "No lib file {0} found for {1}:{2}", nugetLibFile, dependency.Name, dependency.Version));
+                    }
+
+                    // Download from nuget
+                    FileSystem.EnsureExistingDirectory(dependencyPath);
+                    using (Stream sourceStream = matchingFile.First().GetStream())
+                    using (FileStream destinationStream = File.Create(dependencyFile))
+                    {
+                        await sourceStream.CopyToAsync(destinationStream);
+                    }
                 }
 
                 // Compute target path

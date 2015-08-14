@@ -31,5 +31,9 @@
       <Name>UTSampleDependency</Name>
       <Version>1.0.0.0</Version>
     </Dependency>
+    <Dependency>
+      <Name>NuGet.Core</Name>
+      <Version>2.8.6.0</Version>
+    </Dependency>
   </Dependencies>
 </Project>
