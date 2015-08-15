@@ -102,7 +102,7 @@ namespace Fadm.CommandLine
             Assert.AreEqual(true, Directory.Exists(copiedDependencyLocation));
             Assert.AreEqual(true, File.Exists(Path.Combine(copiedDependencyLocation, fileName)));
             Assert.AreEqual(ExecutionResultStatus.Success, resultCopy.SubExecutionResults[index].Status);
-            Assert.AreEqual(true, resultCopy.SubExecutionResults[index].Message.EndsWith("successfully"));
+            Assert.AreEqual(true, resultCopy.SubExecutionResults[index].Message.Contains("copied to"));
         }
     }
 }

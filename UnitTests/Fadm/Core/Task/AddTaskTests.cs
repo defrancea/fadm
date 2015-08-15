@@ -75,11 +75,12 @@ namespace Fadm.CommandLine
             namespaceManager.AddNamespace("ns", @"http://schemas.microsoft.com/developer/msbuild/2003");
 
             // After build execution added by Fadm
+            XmlNode preBuildEventNode = document.SelectSingleNode(@"//ns:Project/ns:Target[@Name='BeforeBuild']/ns:Exec[@Command='Fadm copy $(ProjectDir)']", namespaceManager);
             XmlNode postBuildEventNode = document.SelectSingleNode(@"//ns:Project/ns:Target[@Name='AfterBuild']/ns:Exec[@Command='Fadm install $(TargetPath)']", namespaceManager);
             XmlNode buildImportNode = document.SelectSingleNode(@"//ns:Project/ns:Import[@Project='$(MSBuildToolsPath)\Microsoft.CSharp.targets']", namespaceManager);
 
-            // Return true if both nodes are in the document
-            return (null != postBuildEventNode && null != buildImportNode);
+            // Return true if all nodes are in the document
+            return (null != preBuildEventNode && null != postBuildEventNode && null != buildImportNode);
         }
     }
 }

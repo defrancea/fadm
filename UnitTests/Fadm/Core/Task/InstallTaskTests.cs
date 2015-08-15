@@ -98,7 +98,7 @@ namespace Fadm.CommandLine
 
             // Assert output
             Assert.AreEqual(ExecutionResultStatus.Success, result.Status);
-            Assert.AreEqual(2, result.SubExecutionResults.Length);
+            Assert.AreEqual(2, result.SubExecutionResults.Count);
             Assert.AreEqual(expectedSubStatus, result.SubExecutionResults[1].Status);
             Assert.AreEqual(true, result.SubExecutionResults[1].Message.Contains(expectedSubMessage));
             Assert.AreEqual(true, Directory.Exists(dependencyDirectoryPath));

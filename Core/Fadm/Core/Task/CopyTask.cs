@@ -72,7 +72,7 @@ namespace Fadm.Core.FadmTask
                 // Validate file existence
                 if (!File.Exists(descriptorPath))
                 {
-                    return new ExecutionResult(ExecutionResultStatus.Error, string.Format("The file '{0}' doesn't exist", descriptorPath));
+                    return ExecutionResult.Error("The file '{0}' doesn't exist", descriptorPath);
                 }
 
                 // Load descriptor
@@ -88,13 +88,13 @@ namespace Fadm.Core.FadmTask
 
                 // Return execution result
                 await Task.WhenAll(tasks);
-                return new ExecutionResult(ExecutionResultStatus.Success, "Copy executed", (from r in tasks select r.Result).ToArray());
+                return ExecutionResult.Success("Copy executed").With(from r in tasks select r.Result);
             }
 
             // Report error if any
             catch (Exception exception)
             {
-                return new ExecutionResult(ExecutionResultStatus.Error, exception.Message);
+                return ExecutionResult.Error(exception);
             }
         }
 
@@ -117,7 +117,18 @@ namespace Fadm.Core.FadmTask
                 string dependencyPath = FileSystem.ComputeDependencyDirectoryPath(name, version);
                 string dependencyFile = Path.Combine(dependencyPath, targetFile);
 
+                // Compute target path
+                string targetDependencyPath = Path.Combine(baseDirectory, "dependency");
+                string targetFilePath = Path.Combine(targetDependencyPath, targetFile);
+
+                // Check the dependecy already copied
+                if (File.Exists(targetFilePath))
+                {
+                    return ExecutionResult.Success("Nothing to do for {0}:{1} {2}", dependency.Name, dependency.Version, targetFilePath);
+                }
+
                 // Check the dependency exists
+                bool downloaded = false;
                 if (!File.Exists(dependencyFile))
                 {
                     // Search for the dependency in nuget central
@@ -126,9 +137,7 @@ namespace Fadm.Core.FadmTask
                     if (!repository.TryFindPackage(dependency.Name, SemanticVersion.Parse(dependency.Version.ToString()), out package))
                     {
                         // Report error if not found
-                        return new ExecutionResult(
-                            ExecutionResultStatus.Error,
-                            string.Format(CultureInfo.InvariantCulture, "Dependency {0}:{1} unknown", dependency.Name, dependency.Version));
+                        return ExecutionResult.Error("Dependency {0}:{1} unknown", dependency.Name, dependency.Version);
                     }
 
                     // Look for matching lib file
@@ -138,9 +147,7 @@ namespace Fadm.Core.FadmTask
                     // Report error if not file found
                     if (!matchingFile.Any())
                     {
-                        return new ExecutionResult(
-                            ExecutionResultStatus.Error,
-                            string.Format(CultureInfo.InvariantCulture, "No lib file {0} found for {1}:{2}", nugetLibFile, dependency.Name, dependency.Version));
+                        return ExecutionResult.Error("No lib file {0} found for {1}:{2}", nugetLibFile, dependency.Name, dependency.Version);
                     }
 
                     // Download from nuget
@@ -150,18 +157,7 @@ namespace Fadm.Core.FadmTask
                     {
                         await sourceStream.CopyToAsync(destinationStream);
                     }
-                }
-
-                // Compute target path
-                string targetDependencyPath = Path.Combine(baseDirectory, "dependency");
-                string targetFilePath = Path.Combine(targetDependencyPath, targetFile);
-
-                // Check the dependecy already copied
-                if (File.Exists(targetFilePath))
-                {
-                    return new ExecutionResult(
-                        ExecutionResultStatus.Warning,
-                        string.Format(CultureInfo.InvariantCulture, "Dependency '{0}' already copied", targetFilePath));
+                    downloaded = true;
                 }
 
                 // Copy dependency
@@ -172,14 +168,20 @@ namespace Fadm.Core.FadmTask
                     await sourceStream.CopyToAsync(destinationStream);
                 }
 
-                // Compute sub execution result
-                return new ExecutionResult(
-                    ExecutionResultStatus.Success,
-                    string.Format(CultureInfo.InvariantCulture, "Dependency '{0}' copied successfully", targetFilePath));
+                // Compute and return execution result
+                ExecutionResult copyResult = ExecutionResult.Success("Dependency {0}:{1} copied to {2}", dependency.Name, dependency.Version, targetFilePath);
+                if (!downloaded)
+                {
+                    return copyResult;
+                }
+                else
+                {
+                    return copyResult.With(ExecutionResult.Success("Downloaded dependency {0}:{1}", dependency.Name, dependency.Version).AsEnumerable());
+                }
             }
             catch (Exception exception)
             {
-                return new ExecutionResult(ExecutionResultStatus.Error, exception.Message);
+                return ExecutionResult.Error(exception);
             }
         }
     }

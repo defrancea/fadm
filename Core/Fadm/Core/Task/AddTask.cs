@@ -86,7 +86,7 @@ namespace Fadm.Core.FadmTask
             // Validate file existence
             if (!File.Exists(targetfilepath))
             {
-                return new ExecutionResult(ExecutionResultStatus.Error, string.Format("The file '{0}' doesn't exist", targetfilepath));
+                return ExecutionResult.Error("The file '{0}' doesn't exist", targetfilepath);
             }
 
             try
@@ -132,15 +132,14 @@ namespace Fadm.Core.FadmTask
 
                 // Return execution result
                 await Task.WhenAll(tasks);
-                return new ExecutionResult(ExecutionResultStatus.Success, string.Format("Solution '{0}' processed", targetfilepath), (from r in tasks select r.Result).ToArray());
+                return ExecutionResult.Success("Solution processed: '{0}'", targetfilepath).With(from r in tasks select r.Result);
             }
 
             // Report error if any
             catch (Exception exception)
             {
-                return new ExecutionResult(ExecutionResultStatus.Error, exception.Message);
+                return ExecutionResult.Error(exception);
             }
-
         }
 
         /// <summary>
@@ -170,52 +169,25 @@ namespace Fadm.Core.FadmTask
                 where @"$(MSBuildToolsPath)\Microsoft.CSharp.targets" == (string)i.Attribute("Project")
                 select i).ToArray();
 
-                // After build cached query
-                var afterBuild = (
-                from t in document
-                    .Descendants(NODE_PROJECT)
-                    .Descendants(NODE_TARGET)
-                where "AfterBuild" == (string)t.Attribute("Name")
-                select t).ToArray();
-
-                // Fadm execute cached query
-                var afterBuildExec = (
-                from e in afterBuild
-                    .Descendants(NODE_EXEC)
-                where "Fadm install $(TargetPath)" == (string)e.Attribute("Command")
-                select e).ToArray();
+                // Scan the existing build execute
+                Tuple<XElement[], XElement[]> copyCommand = this.ScanExecute(document, "BeforeBuild", "Fadm copy $(ProjectDir)");
+                Tuple<XElement[], XElement[]> installCommand = this.ScanExecute(document, "AfterBuild", "Fadm install $(TargetPath)");
 
                 // Detect if the file already contains Fadm after build operation
-                if (importProject.Any() && afterBuildExec.Any())
+                if (importProject.Any() && copyCommand.Item2.Any() && installCommand.Item2.Any())
                 {
-                    return new ExecutionResult(ExecutionResultStatus.Warning, string.Format("Fadm already in '{0}'", path));
+                    return ExecutionResult.Warning("Nothing to do: '{0}'", path);
                 }
 
-                // Generate build import
+                // Create nodes if missing
+                List<ExecutionResult> executionResults = new List<ExecutionResult>();
                 if (!importProject.Any())
                 {
-                    document
-                        .Descendants(NODE_PROJECT)
-                        .First()
-                        .Add(importProject = new[] { new XElement(NODE_IMPORT, new XAttribute("Project", @"$(MSBuildToolsPath)\Microsoft.CSharp.targets")) });
+                    document.Descendants(NODE_PROJECT).First().Add(new XElement(NODE_IMPORT, new XAttribute("Project", @"$(MSBuildToolsPath)\Microsoft.CSharp.targets")));
+                    executionResults.Add(ExecutionResult.Success("MSBuild Import injected"));
                 }
-
-                // Generate target node if needed
-                if (!afterBuild.Any())
-                {
-                    document
-                        .Descendants(NODE_PROJECT)
-                        .First()
-                        .Add(afterBuild = new[] { new XElement(NODE_TARGET, new XAttribute("Name", "AfterBuild")) });
-                }
-
-                // Generate exec node if needed
-                if (!afterBuildExec.Any())
-                {
-                    afterBuild
-                        .First()
-                        .Add(afterBuildExec = new[] { new XElement(NODE_EXEC, new XAttribute("Command", "Fadm install $(TargetPath)")) });
-                }
+                executionResults.AddRange(this.EnsureExecNode(document, copyCommand, "BeforeBuild", "Fadm copy $(ProjectDir)"));
+                executionResults.AddRange(this.EnsureExecNode(document, installCommand, "AfterBuild", "Fadm install $(TargetPath)"));
 
                 // Save the document to the file system
                 if (null != document)
@@ -228,13 +200,72 @@ namespace Fadm.Core.FadmTask
                 }
 
                 // Return the execution reuslt
-                return new ExecutionResult(ExecutionResultStatus.Success, string.Format("Fadm added to '{0}'", path));
+                return ExecutionResult.Success("File processed: '{0}'", path).With(executionResults);
             }
             catch (Exception exception)
             {
                 //  Return the execution result
-                return new ExecutionResult(ExecutionResultStatus.Error, exception.Message);
+                return ExecutionResult.Error(exception);
             }
+        }
+
+        /// <summary>
+        ///  Scan execute node from a give step and command.
+        /// </summary>
+        /// <param name="document">The document.</param>
+        /// <param name="step">The build step.</param>
+        /// <param name="command">The command to execute.</param>
+        /// <returns>Both queries as tuple, the first item is the step node and the second is the execute node.</returns>
+        private Tuple<XElement[], XElement[]> ScanExecute(XDocument document, string step, string command)
+        {
+            // Build step nodes query
+            var buildStepNodes =
+            from t in document
+                .Descendants(NODE_PROJECT)
+                .Descendants(NODE_TARGET)
+            where step == (string)t.Attribute("Name")
+            select t;
+
+            // Execute nodes query
+            var execNodes =
+            from e in buildStepNodes
+                .Descendants(NODE_EXEC)
+            where command == (string)e.Attribute("Command")
+            select e;
+
+            // Return data as tuple
+            return new Tuple<XElement[], XElement[]>(buildStepNodes.ToArray(), execNodes.ToArray());
+        }
+
+        /// <summary>
+        /// Ensures and inject node if missing.
+        /// </summary>
+        /// <param name="document">The document.</param>
+        /// <param name="initialNodes">The initial nodes before processing.</param>
+        /// <param name="step">The build step where the action takes place.</param>
+        /// <param name="command">The command to execute.</param>
+        /// <returns>Execution results.</returns>
+        private ExecutionResult[] EnsureExecNode(XDocument document, Tuple<XElement[], XElement[]> initialNodes, string step, string command)
+        {
+            // Generate Build step node if missing
+            XElement buildNode = null;
+            List<ExecutionResult> executionResults = new List<ExecutionResult>();
+            if (!initialNodes.Item1.Any())
+            {
+                buildNode = new XElement(NODE_TARGET, new XAttribute("Name", step));
+                document.Descendants(NODE_PROJECT).First().Add(buildNode);
+                executionResults.Add(ExecutionResult.Success("{0} injected", step));
+            }
+
+            // Generate Execute node if missing
+            if (!initialNodes.Item2.Any())
+            {
+                (initialNodes.Item1.FirstOrDefault() ?? buildNode).Add(new XElement(NODE_EXEC, new XAttribute("Command", command)));
+                executionResults.Add(ExecutionResult.Success("{0} injected", command));
+            }
+
+            // Return results
+            return executionResults.ToArray();
         }
     }
 }

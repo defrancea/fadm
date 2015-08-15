@@ -63,7 +63,7 @@ namespace Fadm.CommandLine
         {
             Assert.AreEqual(
                 string.Format(CultureInfo.InvariantCulture, "[Success] Nice message{0}", Environment.NewLine),
-                Formatter.Format(new ExecutionResult(ExecutionResultStatus.Success, "Nice message")));
+                Formatter.Format(ExecutionResult.Success("Nice message")));
         }
 
         /// <summary>
@@ -74,11 +74,7 @@ namespace Fadm.CommandLine
         {
             Assert.AreEqual(
                 string.Format(CultureInfo.InvariantCulture, "[Success] Nice message{0}", Environment.NewLine),
-                Formatter.Format(
-                    new ExecutionResult(
-                        ExecutionResultStatus.Success,
-                        "Nice message",
-                        new ExecutionResult[0])));
+                Formatter.Format(ExecutionResult.Success("Nice message")));
         }
 
         /// <summary>
@@ -92,16 +88,12 @@ namespace Fadm.CommandLine
                     "[Success] Nice message{0}\t[Error] This one failed{0}\t[Success] This one worked{0}",
                     Environment.NewLine);
 
-            Assert.AreEqual(
-                outputMessage,
-                Formatter.Format(
-                    new ExecutionResult(
-                        ExecutionResultStatus.Success,
-                        "Nice message",
-                        new ExecutionResult[]
+            Assert.AreEqual(outputMessage, Formatter.Format(ExecutionResult
+                    .Success("Nice message")
+                    .With(new ExecutionResult[]
                         {
-                            new ExecutionResult(ExecutionResultStatus.Error, "This one failed"),
-                            new ExecutionResult(ExecutionResultStatus.Success, "This one worked")
+                            ExecutionResult.Error("This one failed"),
+                            ExecutionResult.Success("This one worked")
                         })));
         }
     }

@@ -76,7 +76,7 @@ namespace Fadm.CommandLine
             ExecutionResult result = null;
             Engine
                 .Setup(instance => instance.AddAsync(It.IsAny<string>()))
-                .Returns(Task.Run(() => new ExecutionResult(ExecutionResultStatus.Error, "Add executed")));
+                .Returns(Task.Run(() => ExecutionResult.Error("Add executed")));
             Formatter
                 .Setup(instance => instance.Format(It.IsAny<ExecutionResult>()))
                 .Callback<ExecutionResult>(executionResult => result = executionResult);
@@ -97,7 +97,7 @@ namespace Fadm.CommandLine
             ExecutionResult result = null;
             Engine
                 .Setup(instance => instance.CopyAsync(It.IsAny<string>()))
-                .Returns(Task.Run(() => new ExecutionResult(ExecutionResultStatus.Error, "Copy executed")));
+                .Returns(Task.Run(() => ExecutionResult.Error("Copy executed")));
             Formatter
                 .Setup(instance => instance.Format(It.IsAny<ExecutionResult>()))
                 .Callback<ExecutionResult>(executionResult => result = executionResult);
@@ -118,7 +118,7 @@ namespace Fadm.CommandLine
             ExecutionResult result = null;
             Engine
                 .Setup(instance => instance.InstallAsync(It.IsAny<string>()))
-                .Returns(Task.Run(() => new ExecutionResult(ExecutionResultStatus.Success, "Install executed")));
+                .Returns(Task.Run(() => ExecutionResult.Success("Install executed")));
             Formatter
                 .Setup(instance => instance.Format(It.IsAny<ExecutionResult>()))
                 .Callback<ExecutionResult>(executionResult => result = executionResult);

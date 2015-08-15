@@ -69,14 +69,14 @@ namespace Fadm.Core.FadmTask
             // Validate file existence
             if (!File.Exists(targetfilepath))
             {
-                return new ExecutionResult(ExecutionResultStatus.Error, string.Format("The file '{0}' doesn't exist", targetfilepath));
+                return ExecutionResult.Error("The file '{0}' doesn't exist", targetfilepath);
             }
 
             // Only dll file supported for now
             string extension = Path.GetExtension(targetfilepath);
             if (!allowedExtensions.Contains(extension))
             {
-                return new ExecutionResult(ExecutionResultStatus.Error, string.Format("The file '{0}' must have following extensions [{1}]", targetfilepath, string.Join(",", allowedExtensions)));
+                return ExecutionResult.Error("The file '{0}' must have following extensions [{1}]", targetfilepath, string.Join(",", allowedExtensions));
             }
 
             try
@@ -107,13 +107,13 @@ namespace Fadm.Core.FadmTask
 
                 // Return execution result
                 await Task.WhenAll(tasks);
-                return new ExecutionResult(ExecutionResultStatus.Success, "Install executed", (from t in tasks select t.Result).ToArray());
+                return ExecutionResult.Success("Install executed").With(from t in tasks select t.Result);
             }
 
             // Report error if any
             catch (Exception exception)
             {
-                return new ExecutionResult(ExecutionResultStatus.Error, exception.Message);
+                return ExecutionResult.Error(exception);
             }
         }
 
@@ -136,13 +136,13 @@ namespace Fadm.Core.FadmTask
                 }
 
                 // Result result
-                return new ExecutionResult(ExecutionResultStatus.Success, string.Format("{0} installed to '{0}'", source, destination));
+                return ExecutionResult.Success("{0} installed to '{0}'", source, destination);
             }
 
             // Report error if any
             catch (Exception exception)
             {
-                return new ExecutionResult(critical ? ExecutionResultStatus.Error : ExecutionResultStatus.Warning, exception.Message);
+                return critical ? ExecutionResult.Error(exception) : ExecutionResult.Warning(exception.Message);
             }
         }
     }
