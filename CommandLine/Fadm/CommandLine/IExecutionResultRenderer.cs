@@ -22,15 +22,15 @@ using Fadm.Core;
 namespace Fadm.CommandLine
 {
     /// <summary>
-    /// Formats execution result to a string.
+    /// Formats execution result.
     /// </summary>
-    public interface IExecutionResultFormatter
+    public interface IExecutionResultRenderer
     {
         /// <summary>
         /// Formats an execution result.
         /// </summary>
         /// <param name="executionResult">The execution result to process.</param>
         /// <returns>The result formatted as a string.</returns>
-        string Format(ExecutionResult executionResult);
+        void Render(ExecutionResult executionResult);
     }
 }

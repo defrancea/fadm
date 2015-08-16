@@ -18,8 +18,10 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using Fadm.Core;
 using Fadm.Core.FadmTask;
 using Fadm.Utilities;
@@ -97,10 +99,11 @@ namespace Fadm.CommandLine
             ExecutionResult result = new InstallTask(ressourceFilePath).ExecuteAsync().Result;
 
             // Assert output
+            List<ExecutionResult> executionResult = result.BlockingSubExecutionResults.ToList();
             Assert.AreEqual(ExecutionResultStatus.Success, result.Status);
-            Assert.AreEqual(2, result.SubExecutionResults.Count);
-            Assert.AreEqual(expectedSubStatus, result.SubExecutionResults[1].Status);
-            Assert.AreEqual(true, result.SubExecutionResults[1].Message.Contains(expectedSubMessage));
+            Assert.AreEqual(2, executionResult.Count);
+            Assert.AreEqual(expectedSubStatus, executionResult[0].Status);
+            Assert.AreEqual(true, executionResult[0].Message.Contains(expectedSubMessage));
             Assert.AreEqual(true, Directory.Exists(dependencyDirectoryPath));
             Assert.AreEqual(true, File.Exists(dependencyFilePath));
         }

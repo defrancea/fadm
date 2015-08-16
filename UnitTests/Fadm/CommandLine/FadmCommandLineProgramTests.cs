@@ -44,7 +44,7 @@ namespace Fadm.CommandLine
         /// <summary>
         /// The formatter mock.
         /// </summary>
-        public Mock<IExecutionResultFormatter> Formatter { get; private set; }
+        public Mock<IExecutionResultRenderer> Formatter { get; private set; }
 
         /// <summary>
         /// Initializes <see cref="FadmCommandLineProgramTests"/>.
@@ -53,7 +53,7 @@ namespace Fadm.CommandLine
         public void Initialize()
         {
             Engine = new Mock<IFadmEngine>();
-            Formatter = new Mock<IExecutionResultFormatter>();
+            Formatter = new Mock<IExecutionResultRenderer>();
             Program = new FadmCommandLineProgram(Engine.Object, Formatter.Object);
         }
 
@@ -78,7 +78,7 @@ namespace Fadm.CommandLine
                 .Setup(instance => instance.AddAsync(It.IsAny<string>()))
                 .Returns(Task.Run(() => ExecutionResult.Error("Add executed")));
             Formatter
-                .Setup(instance => instance.Format(It.IsAny<ExecutionResult>()))
+                .Setup(instance => instance.Render(It.IsAny<ExecutionResult>()))
                 .Callback<ExecutionResult>(executionResult => result = executionResult);
             Program.Execute(new string[] { "add", "foo.sln" });
             Engine.Verify(instance => instance.AddAsync("foo.sln"));
@@ -99,7 +99,7 @@ namespace Fadm.CommandLine
                 .Setup(instance => instance.CopyAsync(It.IsAny<string>()))
                 .Returns(Task.Run(() => ExecutionResult.Error("Copy executed")));
             Formatter
-                .Setup(instance => instance.Format(It.IsAny<ExecutionResult>()))
+                .Setup(instance => instance.Render(It.IsAny<ExecutionResult>()))
                 .Callback<ExecutionResult>(executionResult => result = executionResult);
             Program.Execute(new string[] { "copy", "foo.csproj" });
             Engine.Verify(instance => instance.CopyAsync("foo.csproj"));
@@ -120,7 +120,7 @@ namespace Fadm.CommandLine
                 .Setup(instance => instance.InstallAsync(It.IsAny<string>()))
                 .Returns(Task.Run(() => ExecutionResult.Success("Install executed")));
             Formatter
-                .Setup(instance => instance.Format(It.IsAny<ExecutionResult>()))
+                .Setup(instance => instance.Render(It.IsAny<ExecutionResult>()))
                 .Callback<ExecutionResult>(executionResult => result = executionResult);
             Program.Execute(new string[] { "install", "foo.dll" });
             Engine.Verify(instance => instance.InstallAsync("foo.dll"));

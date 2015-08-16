@@ -59,8 +59,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Fadm\CommandLine\ExecutionResultFormatter.cs" />
-    <Compile Include="Fadm\CommandLine\IExecutionResultFormatter.cs" />
+    <Compile Include="Fadm\CommandLine\ExecutionResultRenderer.cs" />
+    <Compile Include="Fadm\CommandLine\IExecutionResultRenderer.cs" />
     <Compile Include="Fadm\CommandLine\Mapping\CopyCommand.cs" />
     <Compile Include="Fadm\CommandLine\Mapping\FadmCommand.cs" />
     <Compile Include="Fadm\CommandLine\Mapping\AddCommand.cs" />

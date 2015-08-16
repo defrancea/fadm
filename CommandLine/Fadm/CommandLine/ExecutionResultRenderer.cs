@@ -17,52 +17,64 @@
  * MA 02110-1301  USA
  */
 
-using System.Text;
+using System.IO;
 using Fadm.Core;
 using Fadm.Utilities;
 
 namespace Fadm.CommandLine.Mapping
 {
     /// <summary>
-    /// Formats execution result to a string.
+    /// Formats execution result to a writer.
     /// </summary>
-    public class ExecutionResultFormatter : IExecutionResultFormatter
+    public class ExecutionResultTextRenderer : IExecutionResultRenderer
     {
         /// <summary>
-        /// Formats an execution result.
+        /// The writer used to output the execution.
         /// </summary>
-        /// <param name="executionResult">The execution result to process.</param>
-        /// <returns>The result formatted as a string.</returns>
-        public string Format(ExecutionResult executionResult)
+        public TextWriter writer;
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="ExecutionResultTextRenderer"/>
+        /// </summary>
+        /// <param name="writer">The writer used to output the execution.</param>
+        public ExecutionResultTextRenderer(TextWriter writer)
         {
-            return Format(new StringBuilder(), executionResult, 0).ToString();
+            // Input validation
+            Validate.IsNotNull(writer, "writer must not be null.");
+
+            // Initialize
+            this.writer = writer;
         }
 
         /// <summary>
         /// Formats an execution result.
         /// </summary>
-        /// <param name="stringBuilder">The string builder passed to the whole hierarchy during the formatting.</param>
+        /// <param name="executionResult">The execution result to process.</param>
+        /// <returns>The result formatted as a string.</returns>
+        public void Render(ExecutionResult executionResult)
+        {
+            Render(executionResult, 0);
+        }
+
+        /// <summary>
+        /// Formats an execution result.
+        /// </summary>
         /// <param name="executionResult">The execution result to process.</param>
         /// <param name="depth">The current formatting depth.</param>
-        /// <returns>A stirng builder containing the formatted execution result.</returns>
-        private StringBuilder Format(StringBuilder stringBuilder, ExecutionResult executionResult, int depth)
+        private void Render(ExecutionResult executionResult, int depth)
         {
             // Input validation
-            Validate.IsNotNull(stringBuilder, "stringBuilder must not be null.");
             Validate.IsNotNull(executionResult, "executionResult must not be null.");
             Validate.IsTrue(0 <= depth, "depth must be positive.");
 
             // Append current execution result to the builder
-            stringBuilder.AppendLine(string.Format("{0}[{1}] {2}", new string('\t', depth), executionResult.Status, executionResult.Message));
+            writer.WriteLine(string.Format("{0}[{1}] {2}", new string('\t', depth), executionResult.Status, executionResult.Message));
 
             // Execute the formatting for all sub result
-            foreach (ExecutionResult subExecutionResult in executionResult.SubExecutionResults)
+            foreach (ExecutionResult subExecutionResult in executionResult.BlockingSubExecutionResults)
             {
-                Format(stringBuilder, subExecutionResult, depth + 1);
+                Render(subExecutionResult, depth + 1);
             }
-
-            // Return the string builder
-            return stringBuilder;
         }
     }
 }

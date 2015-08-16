@@ -39,7 +39,7 @@ namespace Fadm.CommandLine
         {
             new FadmCommandLineProgram(
                 new FadmEngine(),
-                new ExecutionResultFormatter())
+                new ExecutionResultTextRenderer(Console.Out))
                 .Execute(args);
         }
 
@@ -49,15 +49,14 @@ namespace Fadm.CommandLine
         public IFadmEngine Engine { get; private set; }
 
         /// <summary>
-        /// The execution result formatter.
+        /// The execution result renderer.
         /// </summary>
-        /// <returns></returns>
-        public IExecutionResultFormatter Formatter { get; private set; }
+        public IExecutionResultRenderer Renderer { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of <see cref="FadmCommandLineProgram"/>.
         /// </summary>
-        public FadmCommandLineProgram(IFadmEngine engine, IExecutionResultFormatter formatter)
+        public FadmCommandLineProgram(IFadmEngine engine, IExecutionResultRenderer formatter)
         {
             // Input validation
             Validate.IsNotNull(engine, "engine must not be null.");
@@ -65,7 +64,7 @@ namespace Fadm.CommandLine
 
             // Initialize
             this.Engine = engine;
-            this.Formatter = formatter;
+            this.Renderer = formatter;
         }
 
         /// <summary>
@@ -104,8 +103,7 @@ namespace Fadm.CommandLine
         /// <param name="add">The add command containing the user input.</param>
         public void Add(AddCommand add)
         {
-            ExecutionResult result = this.Engine.AddAsync(add.FilePath).Result;
-            Console.WriteLine(Formatter.Format(result));
+            Renderer.Render(this.Engine.AddAsync(add.FilePath).Result);
         }
 
         /// <summary>
@@ -114,8 +112,7 @@ namespace Fadm.CommandLine
         /// <param name="add">The copy command containing the user input.</param>
         public void Copy(CopyCommand copy)
         {
-            ExecutionResult result = this.Engine.CopyAsync(copy.FilePath).Result;
-            Console.WriteLine(Formatter.Format(result));
+            Renderer.Render(this.Engine.CopyAsync(copy.FilePath).Result);
         }
 
         /// <summary>
@@ -124,8 +121,7 @@ namespace Fadm.CommandLine
         /// <param name="install">The install method containing the user input.</param>
         public void Install(InstallCommand install)
         {
-            ExecutionResult result = this.Engine.InstallAsync(install.FilePath).Result;
-            Console.WriteLine(Formatter.Format(result));
+            Renderer.Render(this.Engine.InstallAsync(install.FilePath).Result);
         }
     }
 }

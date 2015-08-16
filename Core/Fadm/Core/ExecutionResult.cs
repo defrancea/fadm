@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Threading.Tasks;
 using Fadm.Utilities;
 
 namespace Fadm.Core
@@ -41,9 +42,38 @@ namespace Fadm.Core
         public string Message { get; private set; }
 
         /// <summary>
-        /// The sub execution results.
+        /// The synchronous sub execution results.
         /// </summary>
-        public List<ExecutionResult> SubExecutionResults { get; private set; }
+        private List<ExecutionResult> syncSubExecutionResults;
+
+        /// <summary>
+        /// The asynchronous sub execution results.
+        /// </summary>
+        private List<Task<ExecutionResult>> asyncSubExecutionResults;
+
+        /// <summary>
+        /// Executions resutls waiting for the completing with a blocking calls.
+        /// </summary>
+        public IEnumerable<ExecutionResult> BlockingSubExecutionResults
+        {
+            get
+            {
+                // Produce all synchrone tasks first
+                foreach (ExecutionResult executionResult in this.syncSubExecutionResults)
+                {
+                    yield return executionResult;
+                }
+
+                // For each asynchronous execution, wait for the first next completion and produce it
+                List<Task<ExecutionResult>> executing = this.asyncSubExecutionResults;
+                while (0 < executing.Count)
+                {
+                    int index = Task.WaitAny(executing.ToArray());
+                    yield return executing[index].Result;
+                    executing.RemoveAt(index);
+                }
+            }
+        }
 
         /// <summary>
         /// Initializes a new instance of <see cref="ExecutionResult"/>.
@@ -59,7 +89,8 @@ namespace Fadm.Core
             // Initialize
             this.Status = status;
             this.Message = this.BuildMessage(message, parameters);
-            this.SubExecutionResults = new List<ExecutionResult>();
+            this.syncSubExecutionResults = new List<ExecutionResult>();
+            this.asyncSubExecutionResults = new List<Task<ExecutionResult>>();
         }
 
         /// <summary>
@@ -132,19 +163,36 @@ namespace Fadm.Core
             Validate.IsNotNull(subExecutionResults, "subExecutionResults must not be null");
 
             // Add to sub execution results
-            this.SubExecutionResults.AddRange(subExecutionResults);
+            this.syncSubExecutionResults.AddRange(subExecutionResults);
 
             // Return this for fluent calls
             return this;
         }
 
         /// <summary>
-        /// Returns the current instance as enumerable.
+        /// Chains am execution result adding sub results.
         /// </summary>
-        /// <returns>The instance as enumerable.</returns>
-        public IEnumerable<ExecutionResult> AsEnumerable()
+        /// <param name="subExecutionResults">The sub execution results.</param>
+        /// <returns>The execution results.</returns>
+        public ExecutionResult With(IEnumerable<Task<ExecutionResult>> subExecutionResults)
         {
-            return new[] { this };
+            // Input validation
+            Validate.IsNotNull(subExecutionResults, "subExecutionResults must not be null");
+
+            // Add to sub execution results
+            this.asyncSubExecutionResults.AddRange(subExecutionResults);
+
+            // Return this for fluent calls
+            return this;
+        }
+
+        /// <summary>
+        /// Returns the current instance as a task.
+        /// </summary>
+        /// <returns>The instance as a task.</returns>
+        public Task<ExecutionResult> AsTask()
+        {
+            return Task.FromResult(this);
         }
 
         /// <summary>

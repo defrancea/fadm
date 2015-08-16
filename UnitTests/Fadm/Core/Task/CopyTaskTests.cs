@@ -18,8 +18,10 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using Fadm.Core;
 using Fadm.Core.FadmTask;
 using Fadm.Utilities;
@@ -99,10 +101,11 @@ namespace Fadm.CommandLine
             Assert.AreEqual(ExecutionResultStatus.Success, resultCopy.Status);
 
             // Assert output
+            List<ExecutionResult> executionResults = resultCopy.BlockingSubExecutionResults.ToList();
             Assert.AreEqual(true, Directory.Exists(copiedDependencyLocation));
             Assert.AreEqual(true, File.Exists(Path.Combine(copiedDependencyLocation, fileName)));
-            Assert.AreEqual(ExecutionResultStatus.Success, resultCopy.SubExecutionResults[index].Status);
-            Assert.AreEqual(true, resultCopy.SubExecutionResults[index].Message.Contains("copied to"));
+            Assert.AreEqual(ExecutionResultStatus.Success, executionResults[index].Status);
+            Assert.AreEqual(true, executionResults[index].Message.StartsWith("Restored dependency"));
         }
     }
 }

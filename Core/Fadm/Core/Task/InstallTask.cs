@@ -64,19 +64,19 @@ namespace Fadm.Core.FadmTask
         /// Installs a file to the local repository.
         /// </summary>
         /// <returns>The execution result.</returns>
-        public async Task<ExecutionResult> ExecuteAsync()
+        public Task<ExecutionResult> ExecuteAsync()
         {
             // Validate file existence
             if (!File.Exists(targetfilepath))
             {
-                return ExecutionResult.Error("The file '{0}' doesn't exist", targetfilepath);
+                return ExecutionResult.Error("The file '{0}' doesn't exist", targetfilepath).AsTask();
             }
 
             // Only dll file supported for now
             string extension = Path.GetExtension(targetfilepath);
             if (!allowedExtensions.Contains(extension))
             {
-                return ExecutionResult.Error("The file '{0}' must have following extensions [{1}]", targetfilepath, string.Join(",", allowedExtensions));
+                return ExecutionResult.Error("The file '{0}' must have following extensions [{1}]", targetfilepath, string.Join(",", allowedExtensions)).AsTask();
             }
 
             try
@@ -93,27 +93,25 @@ namespace Fadm.Core.FadmTask
                 string dependencyPath = FileSystem.ComputeDependencyDirectoryPath(name, version);
                 FileSystem.EnsureExistingDirectory(dependencyPath);
 
-                // Initialize task list
-                List<Task<ExecutionResult>> tasks = new List<Task<ExecutionResult>>();
-
-                // Copy the dependency file
+                // Determine paths
                 string fileTarget = FileSystem.ComputeDependencyFilePath(name, version, extension.Substring(1));
-                tasks.Add(InstallFileAsync(targetfilepath, Path.Combine(dependencyPath, fileTarget), critical: true));
-
-                // Copy the pdb if available
                 string pdbPath = Path.ChangeExtension(targetfilepath, PDB_EXTENSION);
                 string pdbFileTarget = Path.ChangeExtension(fileTarget, PDB_EXTENSION);
-                tasks.Add(InstallFileAsync(pdbPath, Path.Combine(dependencyPath, pdbFileTarget), critical: false));
 
                 // Return execution result
-                await Task.WhenAll(tasks);
-                return ExecutionResult.Success("Install executed").With(from t in tasks select t.Result);
+                return ExecutionResult
+                    .Success("Install executed")
+                    .With(new[]
+                        {
+                            InstallFileAsync(targetfilepath, Path.Combine(dependencyPath, fileTarget), critical: true),
+                            InstallFileAsync(pdbPath, Path.Combine(dependencyPath, pdbFileTarget), critical: false)
+                        }).AsTask();
             }
 
             // Report error if any
             catch (Exception exception)
             {
-                return ExecutionResult.Error(exception);
+                return ExecutionResult.Error(exception).AsTask();
             }
         }
 

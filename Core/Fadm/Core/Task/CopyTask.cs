@@ -79,16 +79,8 @@ namespace Fadm.Core.FadmTask
                 DescriptorLoader loader = new DescriptorLoader();
                 Project project = await loader.LoadAsync(descriptorPath);
 
-                // Process each dependencies
-                List<Task<ExecutionResult>> tasks = new List<Task<ExecutionResult>>();
-                foreach (Dependency dependency in project.Dependencies)
-                {
-                    tasks.Add(this.ProcessDependencyAsync(dependency, descriptorDirectory));
-                }
-
                 // Return execution result
-                await Task.WhenAll(tasks);
-                return ExecutionResult.Success("Copy executed").With(from r in tasks select r.Result);
+                return ExecutionResult.Success("Copy executed").With(from d in project.Dependencies select this.ProcessDependencyAsync(d, descriptorDirectory));
             }
 
             // Report error if any
@@ -128,7 +120,7 @@ namespace Fadm.Core.FadmTask
                 }
 
                 // Check the dependency exists
-                bool downloaded = false;
+                Stream dependencyStream = null;
                 if (!File.Exists(dependencyFile))
                 {
                     // Search for the dependency in nuget central
@@ -150,39 +142,60 @@ namespace Fadm.Core.FadmTask
                         return ExecutionResult.Error("No lib file {0} found for {1}:{2}", nugetLibFile, dependency.Name, dependency.Version);
                     }
 
-                    // Download from nuget
-                    FileSystem.EnsureExistingDirectory(dependencyPath);
-                    using (Stream sourceStream = matchingFile.First().GetStream())
-                    using (FileStream destinationStream = File.Create(dependencyFile))
-                    {
-                        await sourceStream.CopyToAsync(destinationStream);
-                    }
-                    downloaded = true;
+                    // Define stream from nuget
+                    dependencyStream = matchingFile.First().GetStream();
                 }
 
-                // Copy dependency
-                FileSystem.EnsureExistingDirectory(targetDependencyPath);
-                using (FileStream sourceStream = File.OpenRead(dependencyFile))
-                using (FileStream destinationStream = File.Create(targetFilePath))
-                {
-                    await sourceStream.CopyToAsync(destinationStream);
-                }
+                // Return the result
+                return await this.RestoreDependencyAsync(dependencyFile, targetFilePath, dependency, dependencyStream);
 
-                // Compute and return execution result
-                ExecutionResult copyResult = ExecutionResult.Success("Dependency {0}:{1} copied to {2}", dependency.Name, dependency.Version, targetFilePath);
-                if (!downloaded)
-                {
-                    return copyResult;
-                }
-                else
-                {
-                    return copyResult.With(ExecutionResult.Success("Downloaded dependency {0}:{1}", dependency.Name, dependency.Version).AsEnumerable());
-                }
             }
             catch (Exception exception)
             {
                 return ExecutionResult.Error(exception);
             }
+        }
+
+        private async Task<ExecutionResult> RestoreDependencyAsync(string sourceFile, string destinationFile, Dependency dependency, Stream stream)
+        {
+            // Initialize sub execution results
+            List<ExecutionResult> subExecutionResults = new List<ExecutionResult>();
+
+            // Retrieve from stream
+            if (null != stream)
+            {
+                FileSystem.EnsureExistingDirectory(Path.GetDirectoryName(sourceFile));
+                using (Stream sourceStream = stream)
+                using (FileStream destinationStream = File.Create(sourceFile))
+                {
+                    subExecutionResults.Add(await this.CopyDependencyAsync(sourceStream, destinationStream, dependency, "Downloaded dependency {0}:{1}"));
+                }
+            }
+
+            // Copy local file
+            FileSystem.EnsureExistingDirectory(Path.GetDirectoryName(destinationFile));
+            using (FileStream sourceStream = File.OpenRead(sourceFile))
+            using (FileStream destinationStream = File.Create(destinationFile))
+            {
+                subExecutionResults.Add(await this.CopyDependencyAsync(sourceStream, destinationStream, dependency, "Copied dependency {0}:{1}"));
+            }
+
+            // Return results
+            return ExecutionResult.Success("Restored dependency {0}:{1}", dependency.Name, dependency.Version).With(subExecutionResults);
+        }
+
+        /// <summary>
+        /// Downloads the depnendency.
+        /// </summary>
+        /// <param name="sourceStream">The source stream.</param>
+        /// <param name="destinationStream">The destination stream.</param>
+        /// <param name="dependency">The dependency.</param>
+        /// <param name="message">The displayed message.</param>
+        /// <returns>The execytion result.</returns>
+        private async Task<ExecutionResult> CopyDependencyAsync(Stream sourceStream, Stream destinationStream, Dependency dependency, string message)
+        {
+            await sourceStream.CopyToAsync(destinationStream);
+            return ExecutionResult.Success(message, dependency.Name, dependency.Version);
         }
     }
 }

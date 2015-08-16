@@ -123,16 +123,8 @@ namespace Fadm.Core.FadmTask
                     }
                 }
 
-                // Start processing
-                List<Task<ExecutionResult>> tasks = new List<Task<ExecutionResult>>();
-                foreach (string filePath in fileToProcess)
-                {
-                    tasks.Add(this.ProcessProjectFileAsync(filePath));
-                }
-
-                // Return execution result
-                await Task.WhenAll(tasks);
-                return ExecutionResult.Success("Solution processed: '{0}'", targetfilepath).With(from r in tasks select r.Result);
+                // Start processing and return
+                return ExecutionResult.Success("Solution processed: '{0}'", targetfilepath).With(from f in fileToProcess select this.ProcessProjectFileAsync(f));
             }
 
             // Report error if any

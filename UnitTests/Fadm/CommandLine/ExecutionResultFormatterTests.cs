@@ -18,7 +18,14 @@
  */
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using Fadm.CommandLine.Mapping;
 using Fadm.Core;
 using NUnit.Framework;
@@ -34,7 +41,12 @@ namespace Fadm.CommandLine
         /// <summary>
         /// The formatter instance.
         /// </summary>
-        public ExecutionResultFormatter Formatter { get; private set; }
+        public ExecutionResultTextRenderer Renderer { get; private set; }
+
+        /// <summary>
+        /// The execution output.
+        /// </summary>
+        public StringWriter ExecutionOutput { get; private set; }
 
         /// <summary>
         /// Initializes <see cref="ExecutionResultFormatterTests"/>.
@@ -42,7 +54,7 @@ namespace Fadm.CommandLine
         [SetUp]
         public void Initialize()
         {
-            Formatter = new ExecutionResultFormatter();
+            Renderer = new ExecutionResultTextRenderer(ExecutionOutput = new StringWriter());
         }
 
         /// <summary>
@@ -52,7 +64,7 @@ namespace Fadm.CommandLine
         [ExpectedException(typeof(ArgumentException))]
         public void FormatNull()
         {
-            Formatter.Format(null);
+            Renderer.Render(null);
         }
 
         /// <summary>
@@ -61,9 +73,10 @@ namespace Fadm.CommandLine
         [Test]
         public void FormatOneLevel()
         {
+            Renderer.Render(ExecutionResult.Success("Nice message"));
             Assert.AreEqual(
                 string.Format(CultureInfo.InvariantCulture, "[Success] Nice message{0}", Environment.NewLine),
-                Formatter.Format(ExecutionResult.Success("Nice message")));
+                ExecutionOutput.ToString());
         }
 
         /// <summary>
@@ -72,9 +85,10 @@ namespace Fadm.CommandLine
         [Test]
         public void FormatNestedEmptyChildren()
         {
+            Renderer.Render(ExecutionResult.Success("Nice message"));
             Assert.AreEqual(
                 string.Format(CultureInfo.InvariantCulture, "[Success] Nice message{0}", Environment.NewLine),
-                Formatter.Format(ExecutionResult.Success("Nice message")));
+                ExecutionOutput.ToString());
         }
 
         /// <summary>
@@ -88,13 +102,51 @@ namespace Fadm.CommandLine
                     "[Success] Nice message{0}\t[Error] This one failed{0}\t[Success] This one worked{0}",
                     Environment.NewLine);
 
-            Assert.AreEqual(outputMessage, Formatter.Format(ExecutionResult
+            Renderer.Render(ExecutionResult
                     .Success("Nice message")
                     .With(new ExecutionResult[]
                         {
                             ExecutionResult.Error("This one failed"),
                             ExecutionResult.Success("This one worked")
-                        })));
+                        }));
+
+            Assert.AreEqual(outputMessage, ExecutionOutput.ToString());
+        }
+
+        /// <summary>
+        /// Tests Format(ExecutionResult) with parallel asynchronous execution.
+        /// </summary>
+        [Test]
+        public void FormatNestedParallel()
+        {
+            // Build expected output
+            StringBuilder builder = new StringBuilder(string.Format(CultureInfo.InvariantCulture, "[Success] Nice message{0}", Environment.NewLine));
+            builder.Append(string.Join(string.Empty, Enumerable.Repeat(string.Format(CultureInfo.InvariantCulture, "\t[Success] Done{0}", Environment.NewLine), 5)));
+
+            // Render 5 concurrent execution
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
+            Renderer.Render(ExecutionResult
+                    .Success("Nice message")
+                    .With(new Task<ExecutionResult>[]
+                        {
+                            Spawn("Done"),
+                            Spawn("Done"),
+                            Spawn("Done"),
+                            Spawn("Done"),
+                            Spawn("Done")
+                        }));
+            stopWatch.Stop();
+
+            // Assert rendered and execution time
+            Assert.AreEqual(builder.ToString(), ExecutionOutput.ToString());
+            Assert.IsTrue(1500 > stopWatch.ElapsedMilliseconds);
+        }
+
+        private async Task<ExecutionResult> Spawn(string value)
+        {
+            await Task.Delay(1000);
+            return ExecutionResult.Success(value);
         }
     }
 }
