@@ -65,6 +65,7 @@
     </WixExtension>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="packages.config" />
     <Content Include="Resources\Fadm.ico" />
   </ItemGroup>
   <ItemGroup>
