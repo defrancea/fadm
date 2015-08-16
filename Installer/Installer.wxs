@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Copyright (c) 2015, Fadm. All rights reserved.
+ 
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or (at your option) any later version.
+ 
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+ 
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ MA 02110-1301  USA
+ -->
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<Product Id="63996b48-486e-4a94-b1fe-72d889ea88fb" Name="Fadm Dependency Manager" Language="1033" Version="1.0.0.0" Manufacturer="Fadm" UpgradeCode="cd648dc5-36f8-4640-a9ce-9728887e95c7">
+		
+    <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+		<MajorUpgrade DowngradeErrorMessage="A newer version of Fadm is already installed." />
+		<MediaTemplate EmbedCab="yes"/>
+
+		<Directory Id="TARGETDIR" Name="SourceDir">
+			<Directory Id="ProgramFilesFolder">
+				<Directory Id="INSTALLFOLDER" Name="Fadm Dependency Manager" />
+			</Directory>
+		</Directory>
+
+    <DirectoryRef Id="INSTALLFOLDER">
+      <Component Id="Fadm.exe" Win64="no" Guid="50d64019-a63a-4695-bf17-2b11383582d5">
+        <File Id="Fadm.exe" Name="Fadm.exe" Source="$(var.CommandLine.TargetDir)Fadm.exe" DiskId="1" Vital="yes" />
+      </Component>
+      <Component Id="CommandLine.dll" Win64="no" Guid="8227bb3a-0034-451c-a3bc-bfb527e09b46">
+        <File Id="CommandLine.dll" Name="CommandLine.dll" Source="$(var.CommandLine.TargetDir)CommandLine.dll" DiskId="1" Vital="yes" />
+      </Component>
+      <Component Id="Core.dll" Win64="no" Guid="e13ea3ca-7a67-4e9d-81d1-3bd6e69137bf">
+        <File Id="Core.dll" Name="Core.dll" Source="$(var.Core.TargetDir)Core.dll" DiskId="1" Vital="yes" />
+      </Component>
+      <Component Id="Model.dll" Win64="no" Guid="9f330e1d-2f96-4ff6-82d4-db0c286fdbc1">
+        <File Id="Model.dll" Name="Model.dll" Source="$(var.Model.TargetDir)Model.dll" DiskId="1" Vital="yes" />
+      </Component>
+      <Component Id="Utilities.dll" Win64="no" Guid="711cac29-690d-491a-b91f-d760f6561def">
+        <File Id="Utilities.dll" Name="Utilities.dll" Source="$(var.Utilities.TargetDir)Utilities.dll" DiskId="1" Vital="yes" />
+      </Component>
+      <Component Id="LICENSE" Win64="no" Guid="d7fea860-bab9-4fcc-a202-e8b5e034e821">
+        <File Id="LICENSE" Name="LICENSE" Source="$(var.SolutionDir)LICENSE" DiskId="1" Vital="yes" />
+      </Component>
+    </DirectoryRef>
+
+    <Feature Id="Complete" Title="Fadm" Description="Fadm" ConfigurableDirectory="INSTALLFOLDER" Level="1" Display="expand">
+      <ComponentRef Id="Fadm.exe" />
+      <ComponentRef Id="CommandLine.dll" />
+      <ComponentRef Id="Core.dll" />
+      <ComponentRef Id="Model.dll" />
+      <ComponentRef Id="Utilities.dll" />
+      <ComponentRef Id="LICENSE" />
+    </Feature>
+
+    <WixVariable Id="WixUILicenseRtf" Value="$(var.SolutionDir)LICENSE.rtf" />
+    <Icon Id="Fadm.ico" SourceFile="$(var.ProjectDir)Resources\Fadm.ico"/>
+    <Property Id="ARPPRODUCTICON" Value="Fadm.ico" />
+    <UIRef Id="WixUI_Minimal" />
+
+  </Product>
+</Wix>

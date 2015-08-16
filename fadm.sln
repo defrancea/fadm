@@ -14,9 +14,19 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{40F85521-2482-49A1-9E0B-F67BC1DCD52C}"
 	ProjectSection(SolutionItems) = preProject
 		.travis.yml = .travis.yml
+		LICENSE = LICENSE
+		LICENSE.rtf = LICENSE.rtf
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Model", "Model\Model.csproj", "{688E0507-70DA-4268-B8AF-94CB2F1F5CB2}"
+EndProject
+Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "Installer", "Installer\Installer.wixproj", "{77C91B3D-FC73-4298-BE16-7BBC2AB1016F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{40A20D22-7CD9-438E-B748-1BAAAA53AA5E}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\packages.config = .nuget\packages.config
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -44,6 +54,10 @@ Global
 		{688E0507-70DA-4268-B8AF-94CB2F1F5CB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{688E0507-70DA-4268-B8AF-94CB2F1F5CB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{688E0507-70DA-4268-B8AF-94CB2F1F5CB2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77C91B3D-FC73-4298-BE16-7BBC2AB1016F}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{77C91B3D-FC73-4298-BE16-7BBC2AB1016F}.Debug|Any CPU.Build.0 = Debug|x86
+		{77C91B3D-FC73-4298-BE16-7BBC2AB1016F}.Release|Any CPU.ActiveCfg = Release|x86
+		{77C91B3D-FC73-4298-BE16-7BBC2AB1016F}.Release|Any CPU.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
