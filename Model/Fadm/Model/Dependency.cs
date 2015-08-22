@@ -20,7 +20,7 @@
 using System;
 using System.Globalization;
 using System.Reflection;
-using Fadm.Utilities;
+using EnsureThat;
 
 namespace Fadm.Model
 {
@@ -59,9 +59,9 @@ namespace Fadm.Model
         public Dependency(string name, Version version, CultureInfo culture, ProcessorArchitecture architecture)
         {
             // Input validation
-            Validate.IsNotNullOrWhitespace(name, "The assembly name must me specified.");
-            Validate.IsNotNull(version, "The version name must me specified.");
-            Validate.IsNotNull(culture, "The assembly culture must me specified.");
+            Ensure.That(name, "name").IsNotNullOrWhiteSpace();
+            Ensure.That(version, "version").IsNotNull();
+            Ensure.That(culture, "culture").IsNotNull();
 
             // Initializes
             this.Name = name;

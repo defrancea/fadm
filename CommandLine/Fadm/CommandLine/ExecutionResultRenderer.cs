@@ -18,8 +18,8 @@
  */
 
 using System.IO;
+using EnsureThat;
 using Fadm.Core;
-using Fadm.Utilities;
 
 namespace Fadm.CommandLine.Mapping
 {
@@ -40,7 +40,7 @@ namespace Fadm.CommandLine.Mapping
         public ExecutionResultTextRenderer(TextWriter writer)
         {
             // Input validation
-            Validate.IsNotNull(writer, "writer must not be null.");
+            Ensure.That(writer, "writer").IsNotNull();
 
             // Initialize
             this.writer = writer;
@@ -64,8 +64,8 @@ namespace Fadm.CommandLine.Mapping
         private void Render(ExecutionResult executionResult, int depth)
         {
             // Input validation
-            Validate.IsNotNull(executionResult, "executionResult must not be null.");
-            Validate.IsTrue(0 <= depth, "depth must be positive.");
+            Ensure.That(executionResult, "executionResult").IsNotNull();
+            Ensure.That(0 <= depth, "positive depth").IsTrue();
 
             // Append current execution result to the builder
             writer.WriteLine(string.Format("{0}[{1}] {2}", new string('\t', depth), executionResult.Status, executionResult.Message));

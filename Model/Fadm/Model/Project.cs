@@ -17,7 +17,7 @@
  * MA 02110-1301  USA
  */
 
-using Fadm.Utilities;
+using EnsureThat;
 
 namespace Fadm.Model
 {
@@ -38,7 +38,7 @@ namespace Fadm.Model
         public Project(Dependency[] dependencies)
         {
             // Input validation
-            Validate.IsNotNull(dependencies, "Project dependencies must be specified.");
+            Ensure.That(dependencies, "dependencies").IsNotNull();
 
             // Initializes
             this.Dependencies = dependencies;

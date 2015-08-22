@@ -19,6 +19,7 @@
 
 using System;
 using System.IO;
+using EnsureThat;
 
 namespace Fadm.Utilities
 {
@@ -31,7 +32,7 @@ namespace Fadm.Utilities
         public static void EnsureExistingDirectory(string path)
         {
             // Input validation
-            Validate.IsNotNullOrWhitespace(path, "path must not be null.");
+            Ensure.That(path, "path").IsNotNullOrWhiteSpace();
 
             // Check the file system and create the directory if needed.
             if (!Directory.Exists(path))
@@ -57,8 +58,8 @@ namespace Fadm.Utilities
         public static string ComputeDependencyDirectoryPath(string name, string version)
         {
             // Input validation
-            Validate.IsNotNullOrWhitespace(name, "name must not be null.");
-            Validate.IsNotNullOrWhitespace(version, "version must not be null.");
+            Ensure.That(name, "name").IsNotNullOrWhiteSpace();
+            Ensure.That(version, "version").IsNotNullOrWhiteSpace();
 
             // Return the computed value
             return Path.Combine(ComputeReporitoryPath(), name, version);
@@ -74,9 +75,9 @@ namespace Fadm.Utilities
         public static string ComputeFileName(string name, string version, string extension)
         {
             // Input validation
-            Validate.IsNotNullOrWhitespace(name, "name must not be null.");
-            Validate.IsNotNullOrWhitespace(version, "version must not be null.");
-            Validate.IsNotNullOrWhitespace(extension, "extension must not be null.");
+            Ensure.That(name, "name").IsNotNullOrWhiteSpace();
+            Ensure.That(version, "version").IsNotNullOrWhiteSpace();
+            Ensure.That(extension, "extension").IsNotNullOrWhiteSpace();
 
             // Return the computed value
             return string.Format("{0}-{1}.{2}", name, version, extension);
@@ -92,9 +93,9 @@ namespace Fadm.Utilities
         public static string ComputeDependencyFilePath(string name, string version, string extension)
         {
             // Input validation
-            Validate.IsNotNullOrWhitespace(name, "name must not be null.");
-            Validate.IsNotNullOrWhitespace(version, "version must not be null.");
-            Validate.IsNotNullOrWhitespace(extension, "extension must not be null.");
+            Ensure.That(name, "name").IsNotNullOrWhiteSpace();
+            Ensure.That(version, "version").IsNotNullOrWhiteSpace();
+            Ensure.That(extension, "extension").IsNotNullOrWhiteSpace();
 
             string fileTarget = ComputeFileName(name, version, extension);
 

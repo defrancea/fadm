@@ -18,11 +18,11 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using EnsureThat;
 using Fadm.Utilities;
 
 namespace Fadm.Core.FadmTask
@@ -54,7 +54,7 @@ namespace Fadm.Core.FadmTask
         public InstallTask(string path)
         {
             // Input validation
-            Validate.IsNotNullOrWhitespace(path, "path must not be null.");
+            Ensure.That(path, "path").IsNotNullOrWhiteSpace();
 
             // Ensure the path is absolute
             targetfilepath = Path.GetFullPath(path);

@@ -26,8 +26,8 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Schema;
+using EnsureThat;
 using Fadm.Model;
-using Fadm.Utilities;
 using Model.Fadm.Model.Schema;
 
 namespace Fadm.Core.Loader
@@ -45,8 +45,8 @@ namespace Fadm.Core.Loader
         public async Task<Project> LoadAsync(string fileName)
         {
             // Input validation
-            Validate.IsNotNullOrWhitespace(fileName, "The filename must be set.");
-            Validate.IsTrue(File.Exists(fileName), string.Format(CultureInfo.InvariantCulture, "Descriptor {0} not found.", fileName));
+            Ensure.That(fileName, "fileName").IsNotNullOrWhiteSpace();
+            Ensure.That(File.Exists(fileName), "fileExists").IsTrue();
 
             // Read the document from file system
             XDocument document;

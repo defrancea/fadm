@@ -24,7 +24,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using Fadm.Utilities;
+using EnsureThat;
 
 namespace Fadm.Core.FadmTask
 {
@@ -70,7 +70,7 @@ namespace Fadm.Core.FadmTask
         public AddTask(string path)
         {
             // Input validation
-            Validate.IsNotNullOrWhitespace(path, "path must not be null.");
+            Ensure.That(path, "path").IsNotNullOrWhiteSpace();
 
             // Initialize
             slnRegex = new Regex(@"^Project\(""{(.+)}""\)\ *=\ *""(.+)""\ *,\ *""(.+)""\ *,\ *""{(.+)}""$", RegexOptions.Compiled);

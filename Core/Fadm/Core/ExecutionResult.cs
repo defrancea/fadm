@@ -22,7 +22,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using Fadm.Utilities;
+using EnsureThat;
 
 namespace Fadm.Core
 {
@@ -84,7 +84,7 @@ namespace Fadm.Core
         private ExecutionResult(ExecutionResultStatus status, string message, params object[] parameters)
         {
             // Input validation
-            Validate.IsNotNull(message, "message must not be null.");
+            Ensure.That(message, "message").IsNotNullOrWhiteSpace();
 
             // Initialize
             this.Status = status;
@@ -102,7 +102,7 @@ namespace Fadm.Core
         public static ExecutionResult Success(string message, params object[] parameters)
         {
             // Input validation
-            Validate.IsNotNull(message, "message must not be null.");
+            Ensure.That(message, "message").IsNotNullOrWhiteSpace();
 
             // Build result
             return new ExecutionResult(ExecutionResultStatus.Success, message, parameters);
@@ -117,7 +117,7 @@ namespace Fadm.Core
         public static ExecutionResult Warning(string message, params object[] parameters)
         {
             // Input validation
-            Validate.IsNotNull(message, "message must not be null.");
+            Ensure.That(message, "message").IsNotNullOrWhiteSpace();
 
             // Build result
             return new ExecutionResult(ExecutionResultStatus.Warning, message, parameters);
@@ -132,7 +132,7 @@ namespace Fadm.Core
         public static ExecutionResult Error(string message, params object[] parameters)
         {
             // Input validation
-            Validate.IsNotNull(message, "message must not be null.");
+            Ensure.That(message, "message").IsNotNullOrWhiteSpace();
 
             // Build result
             return new ExecutionResult(ExecutionResultStatus.Error, message, parameters);
@@ -146,7 +146,7 @@ namespace Fadm.Core
         public static ExecutionResult Error(Exception exception)
         {
             // Input validation
-            Validate.IsNotNull(exception, "exception must not be null");
+            Ensure.That(exception, "exception").IsNotNull();
 
             // Build result
             return new ExecutionResult(ExecutionResultStatus.Error, exception.Message);
@@ -160,7 +160,7 @@ namespace Fadm.Core
         public ExecutionResult With(IEnumerable<ExecutionResult> subExecutionResults)
         {
             // Input validation
-            Validate.IsNotNull(subExecutionResults, "subExecutionResults must not be null");
+            Ensure.That(subExecutionResults, "subExecutionResults").IsNotNull();
 
             // Add to sub execution results
             this.syncSubExecutionResults.AddRange(subExecutionResults);
@@ -177,7 +177,7 @@ namespace Fadm.Core
         public ExecutionResult With(IEnumerable<Task<ExecutionResult>> subExecutionResults)
         {
             // Input validation
-            Validate.IsNotNull(subExecutionResults, "subExecutionResults must not be null");
+            Ensure.That(subExecutionResults, "subExecutionResults").IsNotNull();
 
             // Add to sub execution results
             this.asyncSubExecutionResults.AddRange(subExecutionResults);
@@ -204,7 +204,7 @@ namespace Fadm.Core
         private string BuildMessage(string template, params object[] parameters)
         {
             // Input validation
-            Validate.IsNotNull(template, "template must not be null");
+            Ensure.That(template, "template").IsNotNullOrWhiteSpace();
 
             // Return template only if no parameter are set
             if (null == parameters || !parameters.Any())

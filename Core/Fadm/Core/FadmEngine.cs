@@ -18,8 +18,8 @@
  */
 
 using System.Threading.Tasks;
+using EnsureThat;
 using Fadm.Core.FadmTask;
-using Fadm.Utilities;
 
 namespace Fadm.Core
 {
@@ -36,7 +36,7 @@ namespace Fadm.Core
         public async Task<ExecutionResult> AddAsync(string path)
         {
             // Input validation
-            Validate.IsNotNullOrWhitespace(path, "path must not be null.");
+            Ensure.That(path, "path").IsNotNullOrWhiteSpace();
 
             // Invoke the task
             return await new AddTask(path).ExecuteAsync();
@@ -50,7 +50,7 @@ namespace Fadm.Core
         public async Task<ExecutionResult> CopyAsync(string path)
         {
             // Input validation
-            Validate.IsNotNullOrWhitespace(path, "path must not be null.");
+            Ensure.That(path, "path").IsNotNullOrWhiteSpace();
 
             // Invoke the task
             return await new CopyTask(path).ExecuteAsync();
@@ -64,7 +64,7 @@ namespace Fadm.Core
         public async Task<ExecutionResult> InstallAsync(string path)
         {
             // Input validation
-            Validate.IsNotNullOrWhitespace(path, "path must not be null.");
+            Ensure.That(path, "path").IsNotNullOrWhiteSpace();
 
             // Invoke the task
             return await new InstallTask(path).ExecuteAsync();

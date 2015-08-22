@@ -69,7 +69,6 @@
     <Compile Include="Fadm\Core\Task\InstallTaskTests.cs" />
     <Compile Include="Fadm\Core\Loader\DescriptorLoaderTests.cs" />
     <Compile Include="Fadm\Utilities\FileSystemTests.cs" />
-    <Compile Include="Fadm\Utilities\ValidateTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

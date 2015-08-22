@@ -19,9 +19,9 @@
 
 using System;
 using CommandLine;
+using EnsureThat;
 using Fadm.CommandLine.Mapping;
 using Fadm.Core;
-using Fadm.Utilities;
 
 namespace Fadm.CommandLine
 {
@@ -59,8 +59,8 @@ namespace Fadm.CommandLine
         public FadmCommandLineProgram(IFadmEngine engine, IExecutionResultRenderer formatter)
         {
             // Input validation
-            Validate.IsNotNull(engine, "engine must not be null.");
-            Validate.IsNotNull(formatter, "formatter must not be null.");
+            Ensure.That(engine, "engine").IsNotNull();
+            Ensure.That(formatter, "formatter").IsNotNull();
 
             // Initialize
             this.Engine = engine;
@@ -74,7 +74,7 @@ namespace Fadm.CommandLine
         public void Execute(string[] args)
         {
             // Input validation
-            Validate.IsNotNull(args, "args must not be null.");
+            Ensure.That(args, "args").IsNotNull();
 
             // Parse the program arguments and provide a callback in order to handle the proper command
             Parser.Default.ParseArgumentsStrict(args, new FadmCommand(), (verb, executedCommand) =>

@@ -61,7 +61,7 @@ namespace Fadm.CommandLine
         /// Tests Execute(string[]) with null value.
         /// </summary>
         [Test]
-        [ExpectedException(typeof(ArgumentException))]
+        [ExpectedException(typeof(ArgumentNullException))]
         public void EmptyNull()
         {
             Program.Execute(null);

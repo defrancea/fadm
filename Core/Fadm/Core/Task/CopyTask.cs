@@ -23,6 +23,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using EnsureThat;
 using Fadm.Core.Loader;
 using Fadm.Model;
 using Fadm.Utilities;
@@ -47,7 +48,7 @@ namespace Fadm.Core.FadmTask
         public CopyTask(string path)
         {
             // Input validation
-            Validate.IsNotNullOrWhitespace(path, "path must not be null.");
+            Ensure.That(path, "path").IsNotNullOrWhiteSpace();
 
             // Initialize
             targetfilepath = Path.GetFullPath(path);

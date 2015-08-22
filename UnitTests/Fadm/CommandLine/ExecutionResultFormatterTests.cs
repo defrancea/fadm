@@ -61,7 +61,7 @@ namespace Fadm.CommandLine
         /// Tests Format(ExecutionResult) with null value.
         /// </summary>
         [Test]
-        [ExpectedException(typeof(ArgumentException))]
+        [ExpectedException(typeof(ArgumentNullException))]
         public void FormatNull()
         {
             Renderer.Render(null);
