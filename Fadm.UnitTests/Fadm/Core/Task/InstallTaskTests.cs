@@ -113,8 +113,8 @@ namespace Fadm.CommandLine
             // Assert when pdb should not be found
             else
             {
-                ExecutionResult dllExecutionResult = executionResult.Where(e => !e.Message.EndsWith(".pdb'.")).First();
-                ExecutionResult pdbExecutionResult = executionResult.Where(e => e.Message.EndsWith(".pdb'.")).First();
+                ExecutionResult dllExecutionResult = executionResult.Where(e => e.Message.Contains("installed to")).First();
+                ExecutionResult pdbExecutionResult = executionResult.Where(e => e.Message.Contains("Could not find")).First();
                 Assert.AreEqual(ExecutionResultStatus.Success, dllExecutionResult.Status);
                 Assert.IsTrue(dllExecutionResult.Message.Contains("installed to"));
                 Assert.AreEqual(ExecutionResultStatus.Warning, pdbExecutionResult.Status);
