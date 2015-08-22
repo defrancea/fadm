@@ -32,17 +32,20 @@
 		</Directory>
 
     <DirectoryRef Id="INSTALLFOLDER">
-      <Component Id="Fadm.exe" Win64="no" Guid="50d64019-a63a-4695-bf17-2b11383582d5">
-        <File Id="Fadm.exe" Name="Fadm.exe" Source="$(var.CommandLine.TargetDir)Fadm.exe" DiskId="1" Vital="yes" />
+      <Component Id="Fadm.exe" Win64="no" Guid="8227bb3a-0034-451c-a3bc-bfb527e09b46">
+        <File Id="Fadm.exe" Name="Fadm.exe" Source="$(var.Fadm.CommandLine.TargetDir)Fadm.exe" DiskId="1" Vital="yes" />
       </Component>
-      <Component Id="CommandLine.dll" Win64="no" Guid="8227bb3a-0034-451c-a3bc-bfb527e09b46">
-        <File Id="CommandLine.dll" Name="CommandLine.dll" Source="$(var.CommandLine.TargetDir)CommandLine.dll" DiskId="1" Vital="yes" />
+      <Component Id="CommandLine.dll" Win64="no" Guid="8ebe3f11-6daa-4c7b-8a71-6bb92b08ed8c">
+        <File Id="CommandLine.dll" Name="CommandLine.dll" Source="$(var.Fadm.CommandLine.TargetDir)CommandLine.dll" DiskId="1" Vital="yes" />
       </Component>
-      <Component Id="Core.dll" Win64="no" Guid="e13ea3ca-7a67-4e9d-81d1-3bd6e69137bf">
-        <File Id="Core.dll" Name="Core.dll" Source="$(var.Core.TargetDir)Core.dll" DiskId="1" Vital="yes" />
+      <Component Id="EnsureThat.vDinasour.dll" Win64="no" Guid="37306418-c24a-452b-8009-97f91862b20d">
+        <File Id="EnsureThat.vDinasour.dll" Name="EnsureThat.vDinasour.dll" Source="$(var.Fadm.CommandLine.TargetDir)EnsureThat.vDinasour.dll" DiskId="1" Vital="yes" />
       </Component>
-      <Component Id="Model.dll" Win64="no" Guid="9f330e1d-2f96-4ff6-82d4-db0c286fdbc1">
-        <File Id="Model.dll" Name="Model.dll" Source="$(var.Model.TargetDir)Model.dll" DiskId="1" Vital="yes" />
+      <Component Id="Fadm.Core.dll" Win64="no" Guid="e13ea3ca-7a67-4e9d-81d1-3bd6e69137bf">
+        <File Id="Fadm.Core.dll" Name="Fadm.Core.dll" Source="$(var.Fadm.Core.TargetDir)Fadm.Core.dll" DiskId="1" Vital="yes" />
+      </Component>
+      <Component Id="Fadm.Model.dll" Win64="no" Guid="9f330e1d-2f96-4ff6-82d4-db0c286fdbc1">
+        <File Id="Fadm.Model.dll" Name="Fadm.Model.dll" Source="$(var.Fadm.Model.TargetDir)Fadm.Model.dll" DiskId="1" Vital="yes" />
       </Component>
       <Component Id="LICENSE" Win64="no" Guid="d7fea860-bab9-4fcc-a202-e8b5e034e821">
         <File Id="LICENSE" Name="LICENSE" Source="$(var.SolutionDir)LICENSE" DiskId="1" Vital="yes" />
@@ -51,9 +54,10 @@
 
     <Feature Id="Complete" Title="Fadm" Description="Fadm" ConfigurableDirectory="INSTALLFOLDER" Level="1" Display="expand">
       <ComponentRef Id="Fadm.exe" />
+      <ComponentRef Id="Fadm.Core.dll" />
+      <ComponentRef Id="Fadm.Model.dll" />
       <ComponentRef Id="CommandLine.dll" />
-      <ComponentRef Id="Core.dll" />
-      <ComponentRef Id="Model.dll" />
+      <ComponentRef Id="EnsureThat.vDinasour.dll" />
       <ComponentRef Id="LICENSE" />
     </Feature>
 

@@ -105,9 +105,9 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Core\Core.csproj">
+    <ProjectReference Include="..\Fadm.Core\Fadm.Core.csproj">
       <Project>{2a36ce60-9215-49c9-878e-f1cedd8d81cc}</Project>
-      <Name>Core</Name>
+      <Name>Fadm.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

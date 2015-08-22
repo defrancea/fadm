@@ -7,7 +7,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Fadm</RootNamespace>
-    <AssemblyName>UnitTests</AssemblyName>
+    <AssemblyName>Fadm.UnitTests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -77,17 +77,17 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CommandLine\CommandLine.csproj">
+    <ProjectReference Include="..\Fadm.CommandLine\Fadm.CommandLine.csproj">
       <Project>{bad5709a-7ec1-4d55-9fe8-0ccc82604dce}</Project>
-      <Name>CommandLine</Name>
+      <Name>Fadm.CommandLine</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Core\Core.csproj">
+    <ProjectReference Include="..\Fadm.Core\Fadm.Core.csproj">
       <Project>{2a36ce60-9215-49c9-878e-f1cedd8d81cc}</Project>
-      <Name>Core</Name>
+      <Name>Fadm.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Model\Model.csproj">
+    <ProjectReference Include="..\Fadm.Model\Fadm.Model.csproj">
       <Project>{688e0507-70da-4268-b8af-94cb2f1f5cb2}</Project>
-      <Name>Model</Name>
+      <Name>Fadm.Model</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

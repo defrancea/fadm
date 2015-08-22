@@ -25,24 +25,24 @@
     <Compile Include="Installer.wxs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CommandLine\CommandLine.csproj">
-      <Name>CommandLine</Name>
+    <ProjectReference Include="..\Fadm.CommandLine\Fadm.CommandLine.csproj">
+      <Name>Fadm.CommandLine</Name>
       <Project>{bad5709a-7ec1-4d55-9fe8-0ccc82604dce}</Project>
       <Private>True</Private>
       <DoNotHarvest>True</DoNotHarvest>
       <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
       <RefTargetDir>INSTALLFOLDER</RefTargetDir>
     </ProjectReference>
-    <ProjectReference Include="..\Core\Core.csproj">
-      <Name>Core</Name>
+    <ProjectReference Include="..\Fadm.Core\Fadm.Core.csproj">
+      <Name>Fadm.Core</Name>
       <Project>{2a36ce60-9215-49c9-878e-f1cedd8d81cc}</Project>
       <Private>True</Private>
       <DoNotHarvest>True</DoNotHarvest>
       <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
       <RefTargetDir>INSTALLFOLDER</RefTargetDir>
     </ProjectReference>
-    <ProjectReference Include="..\Model\Model.csproj">
-      <Name>Model</Name>
+    <ProjectReference Include="..\Fadm.Model\Fadm.Model.csproj">
+      <Name>Fadm.Model</Name>
       <Project>{688e0507-70da-4268-b8af-94cb2f1f5cb2}</Project>
       <Private>True</Private>
       <DoNotHarvest>True</DoNotHarvest>
