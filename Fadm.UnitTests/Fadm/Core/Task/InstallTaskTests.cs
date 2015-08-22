@@ -65,19 +65,17 @@ namespace Fadm.CommandLine
         /// <param name="dependencyName">The dependency name.</param>
         /// <param name="dependencyVersion">The dependency version.</param>
         /// <param name="dependencyExtension">The dependency extension.</param>
-        /// <param name="expectedSubStatus">The expected sub result stats.</param>
-        /// <param name="expectedSubMessage">The expected sub result message.</param>
+        /// <param name="pdbFound">Whether the pdb is found.</param>
         [Test]
-        [TestCase("UTSample", "UTSampleDependency", "1.0.0.0", "dll", ExecutionResultStatus.Warning, "Could not find file")]
-        [TestCase("UTSample", "Test", "1.0.0.0", "exe", ExecutionResultStatus.Warning, "Could not find file")]
-        [TestCase("UTSampleWithPdb", "WithPdb", "1.0.0.0", "dll", ExecutionResultStatus.Success, "installed to")]
+        [TestCase("UTSample", "UTSampleDependency", "1.0.0.0", "dll", false)]
+        [TestCase("UTSample", "Test", "1.0.0.0", "exe", false)]
+        [TestCase("UTSampleWithPdb", "WithPdb", "1.0.0.0", "dll", true)]
         public void InstallSuccess(
             string ressourceFile,
             string dependencyName,
             string dependencyVersion,
             string dependencyExtension,
-            ExecutionResultStatus expectedSubStatus,
-            string expectedSubMessage)
+            bool pdbFound)
         {
             // Compute dependency path
             string dependencyDirectoryPath = FileSystem.ComputeDependencyDirectoryPath(dependencyName, dependencyVersion);
@@ -102,10 +100,26 @@ namespace Fadm.CommandLine
             List<ExecutionResult> executionResult = result.BlockingSubExecutionResults.ToList();
             Assert.AreEqual(ExecutionResultStatus.Success, result.Status);
             Assert.AreEqual(2, executionResult.Count);
-            Assert.AreEqual(expectedSubStatus, executionResult[0].Status);
-            Assert.AreEqual(true, executionResult[0].Message.Contains(expectedSubMessage));
             Assert.AreEqual(true, Directory.Exists(dependencyDirectoryPath));
             Assert.AreEqual(true, File.Exists(dependencyFilePath));
+
+            // Assert when pdb should be found
+            if (pdbFound)
+            {
+                Assert.IsTrue(executionResult.All(e => ExecutionResultStatus.Success == e.Status));
+                Assert.IsTrue(executionResult.All(e => e.Message.Contains("installed to")));
+            }
+
+            // Assert when pdb should not be found
+            else
+            {
+                ExecutionResult dllExecutionResult = executionResult.Where(e => !e.Message.EndsWith(".pdb'.")).First();
+                ExecutionResult pdbExecutionResult = executionResult.Where(e => e.Message.EndsWith(".pdb'.")).First();
+                Assert.AreEqual(ExecutionResultStatus.Success, dllExecutionResult.Status);
+                Assert.IsTrue(dllExecutionResult.Message.Contains("installed to"));
+                Assert.AreEqual(ExecutionResultStatus.Warning, pdbExecutionResult.Status);
+                Assert.IsTrue(pdbExecutionResult.Message.Contains("Could not find"));
+            }
         }
     }
 }
