@@ -156,6 +156,14 @@ namespace Fadm.Core.FadmTask
             }
         }
 
+        /// <summary>
+        /// Restores dependency.
+        /// </summary>
+        /// <param name="sourceFile">The source file.</param>
+        /// <param name="destinationFile">The destination file.</param>
+        /// <param name="dependency">The dependency to restore.</param>
+        /// <param name="stream">The stream from where we can retrieve the dependency.</param>
+        /// <returns>The execution result.</returns>
         private async Task<ExecutionResult> RestoreDependencyAsync(string sourceFile, string destinationFile, Dependency dependency, Stream stream)
         {
             // Initialize sub execution results
