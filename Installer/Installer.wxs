@@ -44,9 +44,6 @@
       <Component Id="Model.dll" Win64="no" Guid="9f330e1d-2f96-4ff6-82d4-db0c286fdbc1">
         <File Id="Model.dll" Name="Model.dll" Source="$(var.Model.TargetDir)Model.dll" DiskId="1" Vital="yes" />
       </Component>
-      <Component Id="Utilities.dll" Win64="no" Guid="711cac29-690d-491a-b91f-d760f6561def">
-        <File Id="Utilities.dll" Name="Utilities.dll" Source="$(var.Utilities.TargetDir)Utilities.dll" DiskId="1" Vital="yes" />
-      </Component>
       <Component Id="LICENSE" Win64="no" Guid="d7fea860-bab9-4fcc-a202-e8b5e034e821">
         <File Id="LICENSE" Name="LICENSE" Source="$(var.SolutionDir)LICENSE" DiskId="1" Vital="yes" />
       </Component>
@@ -57,7 +54,6 @@
       <ComponentRef Id="CommandLine.dll" />
       <ComponentRef Id="Core.dll" />
       <ComponentRef Id="Model.dll" />
-      <ComponentRef Id="Utilities.dll" />
       <ComponentRef Id="LICENSE" />
     </Feature>
 

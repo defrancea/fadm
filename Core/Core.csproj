@@ -67,16 +67,13 @@
     <Compile Include="Fadm\Core\Task\CopyTask.cs" />
     <Compile Include="Fadm\Core\Task\InstallTask.cs" />
     <Compile Include="Fadm\Core\Task\ITask.cs" />
+    <Compile Include="Fadm\Utilities\FileSystem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Model\Model.csproj">
       <Project>{688e0507-70da-4268-b8af-94cb2f1f5cb2}</Project>
       <Name>Model</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Utilities\Utilities.csproj">
-      <Project>{22afbcc8-ca90-46f2-b35a-424baccf4ab0}</Project>
-      <Name>Utilities</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
